@@ -143,9 +143,9 @@ def test_login_after_backend_restart_restores_the_same_profile(tmp_path):
         ("referer", "https://evil.invalid/"),
         (
             "referer",
-            "https://servicewechat.com.evil.invalid/wx0123456789abcdef/devtools/page-frame.html",
+            "https://servicewechat.com.evil.invalid/test-other-project/devtools/page-frame.html",
         ),
-        ("referer", "https://servicewechat.com/wx0123456789abcdef/devtools/page-frame.html"),
+        ("referer", "https://servicewechat.com/test-other-project/devtools/page-frame.html"),
         ("origin", "https://servicewechat.com"),
         ("x-q-local-access", ""),
         ("host", "evil.invalid"),
