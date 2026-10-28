@@ -1,0 +1,84 @@
+.explain-input {
+  height: 240px;
+}
+
+.input-hint {
+  margin-top: 12px;
+}
+
+.explanation-text {
+  margin: 14px 0;
+  font-size: 17px;
+}
+
+.translation-status {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.notice-info-button {
+  width: 44px;
+  min-width: 44px;
+  height: 44px;
+  min-height: 44px;
+  margin: 0;
+  padding: 0;
+  color: #45645a;
+}
+
+.notice-info-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: 1px solid #b9c9be;
+  border-radius: 50%;
+  background: #edf2e9;
+  font-family: Georgia, serif;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.segment-pair {
+  margin: 20px 0;
+  border-left: 2px solid #a9c6ad;
+  padding-left: 16px;
+}
+
+.segment-original {
+  display: block;
+  color: #536c5c;
+  font-size: 17px;
+  line-height: 1.7;
+  margin-bottom: 10px;
+}
+
+.original-text {
+  padding: 16px;
+  border-radius: 14px;
+  background: #edf2e9;
+}
+
+.phrase-input {
+  height: 120px;
+  margin: 15px 0;
+  background: #fff;
+  font-size: 19px;
+}
+
+.phrase-editor {
+  margin-top: 20px;
+  border-top: 1px solid #dce5d8;
+}
+
+.document-part-preview {
+  max-height: 180px;
+  margin: 12px 0;
+  padding: 14px;
+  background: #edf2e9;
+  border-radius: 12px;
+}

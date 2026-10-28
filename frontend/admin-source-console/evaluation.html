@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Evaluation review · QminiGuide</title>
+  <link rel="stylesheet" href="/admin/source-corpus/corpus.css">
+  <script defer src="/admin/evaluation/evaluation.js"></script>
+</head>
+<body><main>
+  <header><div><p class="eyebrow">QminiGuide / Evaluation workspace</p><h1>Review evaluation cases</h1>
+    <p>Check the question and preserved originals before accepting its expected labels.</p></div>
+    <nav><a href="/admin/source-corpus">Source publication</a><a href="/admin/source-conflicts">Conflicts</a></nav></header>
+  <section class="access"><form id="accessForm"><label for="token">Operator access</label><div class="inline">
+    <input id="token" type="password" autocomplete="off" spellcheck="false" required aria-label="Operator token">
+    <button id="connect" type="submit">Connect</button><button id="disconnect" type="button" class="secondary">Disconnect</button>
+  </div></form><p id="identity">Disconnected</p>
+    <p class="muted">Decisions record your account and preserve their history. Source publication and model answer assessment are separate reviews.</p></section>
+  <p id="message" role="status" aria-live="polite"></p>
+  <div class="workspace">
+    <aside><div class="inline"><h2>Evaluation cases</h2><button id="refresh" class="secondary" type="button" disabled>Refresh</button></div>
+      <label for="filter">Find a case</label><input id="filter" type="search" placeholder="Question, language or status">
+      <p id="counts" class="muted"></p><div id="queue"></div></aside>
+    <article id="detail" hidden>
+      <div class="inline"><h2 id="title"></h2><span id="status" class="badge"></span></div>
+      <p id="question"></p><p id="publication" class="muted"></p>
+      <details><summary>Case and evidence hashes</summary><pre id="hashes"></pre></details>
+      <section><h3>Preserved evidence</h3><p class="muted">Short quotes are provenance pointers. Read the complete text and download the original to check conditions and extraction.</p><div id="materials"></div></section>
+      <form id="reviewForm"><h3>Expected labels</h3>
+        <p class="muted">Correct a provisional label only from the evidence. Record why it changed; previous decisions stay in the history.</p>
+        <div class="fields">
+          <label>Expected behavior<select id="behavior" required><option>grounded_answer</option><option>clarify</option><option>refuse</option><option>escalate</option></select></label>
+          <label>Scenario<select id="scenario" required></select></label>
+          <label>Risk<select id="risk" required></select></label>
+          <label>Expected source conflict<select id="conflict"><option value="">Not labeled</option><option value="true">Yes</option><option value="false">No</option></select></label>
+        </div>
+        <label>Required conditions, one per line<textarea id="conditions" rows="3" maxlength="16000"></textarea></label>
+        <label>Forbidden claims, one per line<textarea id="forbidden" rows="3" maxlength="16000"></textarea></label>
+        <details><summary>Explicit case facts for retrieval and conditional decisions</summary>
+          <p class="muted">Include only facts stated in the question or documented for this case. Blank fields remain unknown.</p><div id="applicability" class="fields"></div></details>
+        <label>Review expires<input id="expiry" type="datetime-local" required></label>
+        <fieldset><legend>Confirm after inspecting the original</legend>
+          <label><input id="originalsChecked" type="checkbox" required> I compared the complete extracted text with the preserved original</label>
+          <label><input id="questionChecked" type="checkbox" required> I checked language, question, behavior, scenario and risk labels</label>
+          <label><input id="conditionsChecked" type="checkbox" required> I checked scope, effective dates, conditions, exceptions and forbidden claims</label>
+        </fieldset>
+        <label>Review evidence and reasons<textarea id="note" rows="3" maxlength="1000" required></textarea></label>
+        <button id="approve" type="submit" disabled>Record reviewed labels</button>
+      </form>
+      <section><h3>Withdraw this annotation</h3><label>Reason<textarea id="revokeReason" rows="2" maxlength="1000"></textarea></label>
+        <button id="revoke" type="button" class="secondary" disabled>Revoke annotation</button></section>
+      <section><h3>Review history</h3><ol id="history"></ol></section>
+    </article>
+    <section id="empty" class="empty">Connect and choose a case to review.</section>
+  </div>
+</main></body></html>

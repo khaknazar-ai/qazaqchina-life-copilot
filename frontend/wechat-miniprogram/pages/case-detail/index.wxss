@@ -1,0 +1,114 @@
+.case-heading {
+  margin-top: 14px;
+}
+
+.action-row {
+  padding: 17px 0;
+  border-bottom: 1px solid #e0e6dc;
+}
+
+.action-row .card-title {
+  font-size: 15px;
+}
+
+.action-indicator {
+  align-self: flex-start;
+  color: #5b6e63;
+  font-size: 22px;
+  line-height: 1.2;
+  padding-top: 2px;
+}
+
+.action-done {
+  color: #297a5c;
+}
+
+.action-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-left: 34px;
+  margin-top: 8px;
+}
+
+.action-control {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: #edf1e9;
+  font-size: 13px;
+  color: #4f6d58;
+}
+
+.add-action {
+  margin-top: 18px;
+}
+
+.add-action-row {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: 8px;
+}
+
+.add-action-field {
+  flex: 1;
+  min-width: 0;
+}
+
+.add-action-submit {
+  flex: none;
+  width: 46px;
+}
+
+.history-item {
+  background: #fff;
+  border-radius: 14px;
+  padding: 16px;
+  margin: 12px 0;
+}
+
+.history-item .body-text {
+  margin-top: 8px;
+}
+
+.timeline-item {
+  padding: 12px 0 12px 16px;
+  border-left: 2px solid #cbdccd;
+}
+
+.destructive {
+  color: #955442;
+}
+
+.section-pager {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 14px 0 20px;
+}
+
+.section-pager button {
+  flex: 1;
+  min-width: 0;
+  font-size: 12px;
+}
+
+.section-pager .muted {
+  flex: none;
+  text-align: center;
+}
+
+.full-text-sheet {
+  display: flex;
+  flex-direction: column;
+}
+
+.full-text-scroll {
+  min-height: 80px;
+  max-height: 55vh;
+  height: 55vh;
+}

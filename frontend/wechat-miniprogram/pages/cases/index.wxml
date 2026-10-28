@@ -1,0 +1,114 @@
+<view class="page">
+  <view wx:if="{{isConsul}}" class="card">
+    <text class="eyebrow">QminiGuide</text>
+    <text class="title">{{ui.consulWelcome}}</text>
+    <button class="primary-button" style="width:100%;margin:24px 0 0;" bindtap="goConsul">{{ui.openRequests}}</button>
+  </view>
+  <block wx:else>
+  <view class="page-heading">
+    <text class="eyebrow">QminiGuide</text>
+    <view class="row">
+      <text class="title">{{ui.cases}}</text>
+      <button class="pill" style="width:auto;margin:0;" bindtap="showCreate">+ {{ui.createCase}}</button>
+    </view>
+    <text class="subtitle">{{ui.caseIntro}}</text>
+  </view>
+  <text wx:if="{{session && !session.persistent}}" class="notice">{{ui.sessionOnly}}</text>
+  <form wx:if="{{showCreate}}" class="card" bindsubmit="create">
+    <text class="field-label">{{ui.caseTitle}}</text>
+    <input class="input" name="title" maxlength="160" />
+    <text class="field-label">{{ui.scenario}}</text>
+    <picker
+      range="{{scenarios}}"
+      range-key="label"
+      value="{{scenarioIndex}}"
+      bindchange="onScenarioChange"
+    >
+      <view class="picker-value">{{scenarios[scenarioIndex].label}} ⌄</view>
+    </picker>
+    <button
+      class="primary-button"
+      style="width:100%;margin:16px 0 0;"
+      form-type="submit"
+      loading="{{saving}}"
+      disabled="{{saving}}"
+    >{{ui.createCase}}</button>
+  </form>
+  <view class="segmented">
+    <view class="segment">
+      <button
+        style="width:100%;margin:0;"
+        class="{{filter === 'open' ? 'selected' : ''}}"
+        data-status="open"
+        bindtap="filter"
+      >{{ui.open}}</button>
+    </view>
+    <view class="segment">
+      <button
+        style="width:100%;margin:0;"
+        class="{{filter === 'completed' ? 'selected' : ''}}"
+        data-status="completed"
+        bindtap="filter"
+      >{{ui.completed}}</button>
+    </view>
+    <view class="segment">
+      <button
+        style="width:100%;margin:0;"
+        class="{{filter === 'archived' ? 'selected' : ''}}"
+        data-status="archived"
+        bindtap="filter"
+      >{{ui.archived}}</button>
+    </view>
+  </view>
+  <text wx:if="{{error}}" class="status-error">{{error}}</text>
+  <button
+    wx:if="{{accessNeeded}}"
+    class="secondary-button"
+    style="width:100%;margin:12px 0;"
+    bindtap="goProfile"
+  >{{ui.openProfile}}</button>
+  <text wx:if="{{loading}}" class="loading-line">{{ui.processing}}</text>
+  <view
+    wx:for="{{cases}}"
+    wx:key="case_id"
+    class="case-row"
+    data-id="{{item.case_id}}"
+    bindtap="open"
+  >
+    <view class="row">
+      <text class="tag">{{item.scenarioLabel}}</text>
+      <text class="muted">{{item.completedTasks}} / {{item.taskCount}}</text>
+    </view>
+    <text class="case-title">{{item.title}}</text>
+    <text wx:if="{{item.deadline}}" class="muted">{{ui.deadline}} · {{item.deadline}}</text>
+    <text wx:if="{{item.nextAction}}" class="next-action">{{item.nextAction}} →</text>
+    <view class="progress-track">
+      <view class="progress-fill" style="width:{{item.progress}}%;"></view>
+    </view>
+  </view>
+  <view wx:if="{{!cases.length && !loading && !error}}" class="empty">
+    <text class="card-title">{{ui.noCases}}</text>
+    <text class="muted">{{ui.noCasesHint}}</text>
+    <button class="text-button" style="width:auto;margin:12px 0;" bindtap="goAssistant">{{ui.assistant}} →</button>
+  </view>
+  <view wx:if="{{caseOffset || caseEnd < total}}" class="inline-actions">
+    <view>
+      <button
+        class="secondary-button"
+        style="width:100%;margin:16px 0;"
+        bindtap="previousPage"
+        disabled="{{loading || !caseOffset}}"
+      >{{ui.previousPage}}</button>
+    </view>
+    <view>
+      <button
+        class="secondary-button"
+        style="width:100%;margin:16px 0;"
+        bindtap="more"
+        disabled="{{loading || caseEnd >= total}}"
+      >{{ui.nextPage}}</button>
+    </view>
+  </view>
+  <text wx:if="{{total}}" class="muted">{{caseOffset + 1}}–{{caseEnd}} {{ui.of}} {{total}}</text>
+  </block>
+</view>

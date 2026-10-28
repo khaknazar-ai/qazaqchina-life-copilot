@@ -1,0 +1,38 @@
+<view class="page">
+  <view class="page-heading"><text class="eyebrow">QminiGuide</text><text class="title">{{ui.consulRequests}}</text></view>
+  <picker range="{{filters}}" value="{{filterIndex}}" bindchange="filter" disabled="{{saving}}"><view class="picker-value">{{filters[filterIndex]}} ⌄</view></picker>
+  <text wx:if="{{loading}}" class="loading-line">{{ui.processing}}</text>
+  <text wx:if="{{error}}" class="status-error">{{error}}</text>
+  <button wx:if="{{accessNeeded}}" class="secondary-button" bindtap="goProfile" style="width:100%;margin:12px 0;">{{ui.openProfile}}</button>
+  <text wx:if="{{account && !tickets.length && !loading}}" class="muted">{{ui.noConsulRequests}}</text>
+  <view wx:for="{{tickets}}" wx:key="ticket_id" class="card">
+    <view class="row"><text class="tag">{{ui[item.status]}}</text><text class="tag">{{ui[item.urgency]}}</text></view>
+    <button class="disclosure-button" data-id="{{item.ticket_id}}" bindtap="open" disabled="{{saving}}" style="width:100%;margin:12px 0;"><text>{{item.summary}}</text><text>→</text></button>
+  </view>
+  <view wx:if="{{total > 20}}" class="row">
+    <button class="secondary-button" bindtap="previous" disabled="{{offset === 0 || loading || saving}}" style="width:100%;margin:12px 0;">{{ui.previousPage}}</button>
+    <button class="secondary-button" bindtap="next" disabled="{{total <= offset + 20 || loading || saving}}" style="width:100%;margin:12px 0;">{{ui.nextPage}}</button>
+  </view>
+  <view wx:if="{{ticket}}" class="card">
+    <text class="section-title">{{ui[ticket.reason] || ui.other}}</text>
+    <text class="body-text" user-select="{{true}}">{{ticket.summary}}</text>
+    <view class="row"><text class="tag">{{ui[ticket.status]}}</text><text class="tag">{{ui[ticket.urgency]}}</text></view>
+    <view wx:for="{{ticket.replies}}" wx:key="reply_id" class="reply">
+      <text class="muted">{{ui[item.role]}} · {{item.created_at}}</text>
+      <text class="body-text" user-select="{{true}}">{{item.text}}</text>
+    </view>
+    <view wx:if="{{replyTotal > 10}}" class="row">
+      <button class="text-button" bindtap="previousReplies" disabled="{{replyOffset === 0}}" style="width:100%;margin:12px 0;">{{ui.previousReplies}}</button>
+      <button class="text-button" bindtap="nextReplies" disabled="{{replyTotal <= replyOffset + 10}}" style="width:100%;margin:12px 0;">{{ui.nextReplies}}</button>
+    </view>
+    <view wx:if="{{ticket.status !== 'closed' && ticket.status !== 'resolved'}}">
+      <button class="secondary-button" data-status="in_review" bindtap="changeStatus" disabled="{{saving || ticket.status === 'in_review'}}" style="width:100%;margin:12px 0;">{{ui.startReview}}</button>
+      <form bindsubmit="reply">
+        <textarea class="textarea" name="reply" maxlength="4000" value="{{replyDraft}}" bindinput="onReplyInput" placeholder="{{ui.reply}}" disabled="{{saving}}" />
+        <button class="primary-button" form-type="submit" loading="{{saving}}" disabled="{{saving}}" style="width:100%;margin:12px 0;">{{ui.send}}</button>
+      </form>
+      <button class="text-button" data-status="resolved" bindtap="changeStatus" disabled="{{saving}}" style="width:100%;margin:12px 0;">{{ui.resolveRequest}}</button>
+    </view>
+    <view wx:else><text class="muted">{{ui.requestClosed}}</text><button class="secondary-button" data-status="in_review" bindtap="changeStatus" disabled="{{saving}}" style="width:100%;margin:12px 0;">{{ui.reopenRequest}}</button></view>
+  </view>
+</view>

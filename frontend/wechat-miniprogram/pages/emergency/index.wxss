@@ -1,0 +1,20 @@
+.emergency-page .eyebrow {
+  color: #8e664b;
+}
+
+.emergency-basics {
+  padding: 20px;
+  background: #f1eadd;
+  border-left: 3px solid #b88152;
+  border-radius: 0 16px 16px 0;
+  margin: 25px 0;
+}
+
+.emergency-basics .body-text {
+  font-size: 17px;
+  line-height: 1.7;
+}
+
+.phrase-card {
+  border-color: #d5dac8;
+}

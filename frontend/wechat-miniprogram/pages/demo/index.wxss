@@ -1,0 +1,20 @@
+.demo-intro {
+  margin-bottom: 28rpx;
+  padding: 0 4rpx;
+  color: #7B6B4C;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.scenario-card .eyebrow {
+  margin-bottom: 12rpx;
+}
+
+.scenario-card .tag-row {
+  margin: 20rpx 0 26rpx;
+}
+
+.button-arrow {
+  padding-left: 12rpx;
+  font-size: 15px;
+}

@@ -1,0 +1,84 @@
+<view class="page home-page">
+  <view wx:if="{{isConsul}}" class="card">
+    <text class="eyebrow">QminiGuide</text>
+    <text class="title">{{ui.consulWelcome}}</text>
+    <button class="primary-button" style="width:100%;margin:24px 0 0;" bindtap="goConsul">{{ui.openRequests}}</button>
+  </view>
+  <block wx:else>
+  <view class="home-topline">
+    <text class="wordmark">QminiGuide</text>
+    <picker range="{{languageLabels}}" value="{{languageIndex}}" bindchange="onLanguageChange">
+      <view class="language-control">{{languageLabels[languageIndex]}} ⌄</view>
+    </picker>
+  </view>
+  <view class="home-hero">
+    <text class="title">{{ui.homeHeadline}}</text>
+  </view>
+  <form class="home-compose" bindsubmit="goChat">
+    <textarea
+      name="message"
+      value="{{message}}"
+      maxlength="8000"
+      class="home-input"
+      placeholder="{{ui.homePrompt}}"
+      bindinput="onMessageInput"
+      auto-height="{{true}}"
+    />
+    <view class="input-tools">
+      <view class="tool-wrap">
+        <button class="attach-button" style="width:100%;margin:0;" bindtap="goPhotoIntake"><image src="/assets/icons/photo-active.png" />{{ui.addPhoto}}</button>
+      </view>
+      <view class="tool-wrap wide-tool">
+        <button class="attach-button" style="width:100%;margin:0;" bindtap="goExplain">{{ui.addText}}</button>
+      </view>
+    </view>
+    <button class="primary-button" style="width:100%;margin:0;" form-type="submit">{{ui.ask}} <text class="button-arrow">→</text></button>
+  </form>
+  <button class="kazakhstan-trip-card" style="width:100%;margin:20px 0 0;" bindtap="startKazakhstanTrip">
+    <view>
+      <text class="kazakhstan-trip-title">{{ui.kazakhstanTripTitle}}</text>
+      <text class="kazakhstan-trip-hint">{{ui.kazakhstanTripHint}}</text>
+    </view>
+    <text class="kazakhstan-trip-arrow">→</text>
+  </button>
+  <view class="section-heading">
+    <text class="section-title">{{ui.cases}}</text>
+    <button class="text-button" style="width:auto;margin:0;" bindtap="goCases">{{ui.allCases}} →</button>
+  </view>
+  <view wx:if="{{recentCase}}" class="recent-case" bindtap="resume">
+    <view class="row">
+      <text class="tag">{{recentCase.scenarioLabel}}</text>
+      <text class="muted">{{recentCase.completedTasks}} / {{recentCase.taskCount}}</text>
+    </view>
+    <text class="recent-title">{{recentCase.title}}</text>
+    <text class="muted">{{recentCase.nextAction ? ui.nextAction : ui.continueCase}}</text>
+    <text wx:if="{{recentCase.nextAction}}" class="body-text">{{recentCase.nextAction}}</text>
+    <progress
+      class="home-progress"
+      percent="{{recentCase.progress}}"
+      show-info="{{false}}"
+      stroke-width="4"
+      border-radius="2"
+      activeColor="#367e65"
+      backgroundColor="#e8eee6"
+    />
+  </view>
+  <view wx:elif="{{loading}}" class="muted">{{ui.processing}}</view>
+  <view wx:else class="home-empty">
+    <text class="muted">{{error || ui.noCasesHint}}</text>
+    <button
+      wx:if="{{accessNeeded}}"
+      class="text-button"
+      style="width:auto;margin:0;"
+      bindtap="goProfile"
+    >{{ui.openProfile}} →</button>
+  </view>
+  <button class="emergency-link" style="width:100%;margin:24px 0 0;" bindtap="goEmergency">
+    <view>
+      <text class="emergency-title">{{ui.emergency}}</text>
+      <text class="muted">{{ui.offlineReady}}</text>
+    </view>
+    <text>→</text>
+  </button>
+  </block>
+</view>

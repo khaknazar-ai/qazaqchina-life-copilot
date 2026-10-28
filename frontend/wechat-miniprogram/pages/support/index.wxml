@@ -1,0 +1,169 @@
+<view class="page">
+  <view class="page-heading">
+    <text class="eyebrow">QminiGuide</text>
+    <text class="title">{{ui.supportMode}}</text>
+  </view>
+  <text class="notice">{{ui.queueNotice}}</text>
+  <view class="segmented">
+    <view class="segment">
+      <button
+        class="{{mode === 'help' ? 'selected' : ''}}"
+        style="width:100%;margin:0;"
+        data-mode="help"
+        bindtap="selectMode"
+      >{{ui.requestHelp}}</button>
+    </view>
+    <view class="segment">
+      <button
+        class="{{mode === 'feedback' ? 'selected' : ''}}"
+        style="width:100%;margin:0;"
+        data-mode="feedback"
+        bindtap="selectMode"
+      >{{ui.reportProblem}}</button>
+    </view>
+  </view>
+  <form bindsubmit="submitRequest">
+    <text class="field-label">{{ui.scenario}}</text>
+    <picker
+      wx:if="{{mode === 'help'}}"
+      range="{{[ui.human, ui.paymentRisk, ui.medicalRisk, ui.legalVisaRisk, ui.urgentCase]}}"
+      value="{{escalationReasonIndex}}"
+      bindchange="selectReason"
+    >
+      <view class="picker-value">{{escalationReasonLabel}} ⌄</view>
+    </picker>
+    <picker
+      wx:else
+      range="{{[ui.wrongAnswer, ui.outdatedInfo, ui.unsafeAdvice, ui.sourceProblem]}}"
+      value="{{feedbackCategoryIndex}}"
+      bindchange="selectCategory"
+    >
+      <view class="picker-value">{{feedbackCategoryLabel}} ⌄</view>
+    </picker>
+    <text wx:if="{{prefillNotice}}" class="notice">{{prefillNotice}}</text>
+    <text wx:if="{{safetyWarning}}" class="status-warning">{{safetyWarning}}</text>
+    <text wx:if="{{mode === 'help' && escalationReason !== 'needs_human_help'}}" class="notice">{{ui.professionalNotice}}</text>
+    <text class="field-label">{{ui.question}}</text>
+    <textarea
+      class="textarea support-input"
+      name="message"
+      value="{{summary || message}}"
+      maxlength="4000"
+      disabled="{{requestLoading || feedbackLoading}}"
+      bindinput="onSummaryInput"
+    />
+    <text class="muted">{{ui.dataSecretsNotice}}</text>
+    <button
+      class="primary-button"
+      style="width:100%;margin:18px 0 0;"
+      form-type="submit"
+      disabled="{{requestLoading || feedbackLoading}}"
+      loading="{{requestLoading || feedbackLoading}}"
+    >{{mode === 'help' ? ui.escalationSend : ui.feedbackSend}}</button>
+  </form>
+  <text wx:if="{{error}}" class="status-error">{{error}}</text>
+  <text wx:if="{{requestStatus || feedbackStatus}}" class="notice">{{requestStatus || feedbackStatus}}</text>
+  <button
+    wx:if="{{accessNeeded}}"
+    class="secondary-button"
+    style="width:100%;margin:12px 0;"
+    bindtap="goProfile"
+  >{{ui.openProfile}}</button>
+  <text class="section-title">{{ui.myRequests}}</text>
+  <text wx:if="{{ticketLoading}}" class="loading-line">{{ui.processing}}</text>
+  <text wx:if="{{!tickets.length && !ticketLoading}}" class="muted">{{ui.noRequests}}</text>
+  <view wx:for="{{tickets}}" wx:key="ticket_id" class="ticket">
+    <button
+      class="ticket-title"
+      style="width:100%;margin:0;"
+      data-id="{{item.ticket_id}}"
+      bindtap="openTicket"
+    >
+      <text>{{item.summary}}</text>
+      <text class="tag">{{item.statusLabel}}</text>
+    </button>
+    <text class="muted">{{item.created_at}}</text>
+    <text wx:if="{{item.queueNotice}}" class="muted">{{item.queueNotice}}</text>
+    <view wx:if="{{ticketId === item.ticket_id && openedTicket}}">
+      <text class="body-text full-summary" user-select="{{true}}">{{openedTicket.summary}}</text>
+      <view wx:for="{{openedTicket.replies}}" wx:for-item="reply" wx:key="reply_id" class="reply">
+        <text class="muted">{{ui[reply.role]}} · {{reply.created_at}}</text>
+        <text class="body-text" user-select="{{true}}">{{reply.text}}</text>
+      </view>
+      <text wx:if="{{!openedTicket.replyCount}}" class="muted no-replies">{{ui.noReplies}}</text>
+      <view wx:if="{{replyPageCount > 1}}" class="reply-pagination">
+        <text class="muted">{{ui.replyPage}} {{replyPage}} {{ui.of}} {{replyPageCount}}</text>
+        <view class="pagination-actions">
+          <view>
+            <button
+              class="secondary-button"
+              style="width:100%;margin:0;"
+              bindtap="previousReplies"
+              disabled="{{!hasPreviousReplies}}"
+            >{{ui.previousReplies}}</button>
+          </view>
+          <view>
+            <button
+              class="secondary-button"
+              style="width:100%;margin:0;"
+              bindtap="nextReplies"
+              disabled="{{!hasNextReplies}}"
+            >{{ui.nextReplies}}</button>
+          </view>
+        </view>
+      </view>
+      <form
+        wx:if="{{openedTicket.status !== 'closed' && openedTicket.status !== 'resolved'}}"
+        bindsubmit="reply"
+        data-id="{{item.ticket_id}}"
+      >
+        <textarea
+          class="textarea reply-input"
+          name="reply"
+          value="{{replyDraft}}"
+          maxlength="4000"
+          bindinput="onReplyInput"
+          placeholder="{{ui.reply}}"
+          disabled="{{requestLoading}}"
+        />
+        <button
+          class="secondary-button"
+          style="width:100%;margin:10px 0 0;"
+          form-type="submit"
+          disabled="{{requestLoading}}"
+        >{{ui.send}}</button>
+      </form>
+      <text wx:if="{{openedTicket.status === 'closed' || openedTicket.status === 'resolved'}}" class="muted">{{ui.reopenTicketHint}}</text>
+      <button
+        class="text-button"
+        style="width:100%;margin:8px 0 0;"
+        data-id="{{item.ticket_id}}"
+        data-status="{{openedTicket.status === 'closed' || openedTicket.status === 'resolved' ? 'new' : 'closed'}}"
+        bindtap="ticketStatus"
+        disabled="{{requestLoading}}"
+      >{{openedTicket.status === 'closed' || openedTicket.status === 'resolved' ? ui.reopen : ui.close}}</button>
+    </view>
+  </view>
+  <view wx:if="{{ticketPageCount > 1}}" class="collection-pagination">
+    <text class="muted">{{ui.pageLabel}} {{ticketPage}} {{ui.of}} {{ticketPageCount}}</text>
+    <view class="pagination-actions">
+      <view>
+        <button
+          class="secondary-button"
+          style="width:100%;margin:0;"
+          bindtap="previousTickets"
+          disabled="{{ticketLoading || requestLoading || !hasPreviousTickets}}"
+        >{{ui.previousPage}}</button>
+      </view>
+      <view>
+        <button
+          class="secondary-button"
+          style="width:100%;margin:0;"
+          bindtap="nextTickets"
+          disabled="{{ticketLoading || requestLoading || !hasNextTickets}}"
+        >{{ui.nextPage}}</button>
+      </view>
+    </view>
+  </view>
+  <button class="text-button" style="width:100%;margin:22px 0 0;" bindtap="goPrivacy">{{ui.privacy}} →</button>
+</view>

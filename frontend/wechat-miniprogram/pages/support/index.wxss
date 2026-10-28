@@ -1,0 +1,77 @@
+.support-input {
+  height: 160px;
+  margin-bottom: 10px;
+}
+
+.ticket {
+  margin: 18px 0;
+  padding: 18px;
+  border-radius: 17px;
+  border: 1px solid #e1e8dc;
+  background: #fff;
+}
+
+.ticket-title {
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 0 10px;
+  text-align: left;
+  font-size: 15px;
+}
+
+.ticket-title .tag {
+  flex: none;
+  max-width: 42%;
+}
+
+.reply {
+  padding: 14px 0;
+  border-bottom: 1px solid #e8ede3;
+}
+
+.reply .body-text {
+  margin-top: 7px;
+}
+
+.reply-input {
+  min-height: 95px;
+  height: 100px;
+  margin-top: 15px;
+}
+
+.no-replies {
+  margin-top: 15px;
+}
+
+.reply .body-text,
+.full-summary {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.full-summary {
+  margin: 14px 0;
+}
+
+.collection-pagination,
+.reply-pagination {
+  margin-top: 18px;
+}
+
+.pagination-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.pagination-actions>view {
+  flex: 1;
+  min-width: 0;
+}
+
+.pagination-actions button {
+  min-height: 46px;
+  font-size: 13px;
+  padding: 10px 8px;
+}

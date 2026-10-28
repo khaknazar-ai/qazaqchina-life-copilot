@@ -1,0 +1,60 @@
+{
+  "pages": [
+    "pages/home/index",
+    "pages/demo/index",
+    "pages/demo-detail/index",
+    "pages/chat/index",
+    "pages/photo-intake/index",
+    "pages/support/index",
+    "pages/privacy/index",
+    "pages/checklist/index",
+    "pages/explain/index",
+    "pages/emergency/index",
+    "pages/cases/index",
+    "pages/case-detail/index",
+    "pages/knowledge/index",
+    "pages/profile/index",
+    "pages/consul/index"
+  ],
+  "window": {
+    "navigationBarTitleText": "QminiGuide",
+    "navigationBarBackgroundColor": "#F7F6F2",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#F7F6F2",
+    "backgroundTextStyle": "dark"
+  },
+  "tabBar": {
+    "color": "#708178",
+    "selectedColor": "#166B61",
+    "backgroundColor": "#FFFFFF",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/home/index",
+        "text": "Assistant",
+        "iconPath": "assets/icons/chat.png",
+        "selectedIconPath": "assets/icons/chat-active.png"
+      },
+      {
+        "pagePath": "pages/cases/index",
+        "text": "My cases",
+        "iconPath": "assets/icons/checklist.png",
+        "selectedIconPath": "assets/icons/checklist-active.png"
+      },
+      {
+        "pagePath": "pages/knowledge/index",
+        "text": "Guide",
+        "iconPath": "assets/icons/text.png",
+        "selectedIconPath": "assets/icons/text-active.png"
+      },
+      {
+        "pagePath": "pages/profile/index",
+        "text": "Profile",
+        "iconPath": "assets/icons/profile.png",
+        "selectedIconPath": "assets/icons/profile-active.png"
+      }
+    ]
+  },
+  "style": "v2",
+  "lazyCodeLoading": "requiredComponents"
+}

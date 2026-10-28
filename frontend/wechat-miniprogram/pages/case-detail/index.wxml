@@ -1,0 +1,383 @@
+<view class="page">
+  <text wx:if="{{loading}}" class="loading-line">{{ui.processing}}</text>
+  <text wx:if="{{error}}" class="status-error">{{error}}</text>
+  <button
+    wx:if="{{accessNeeded}}"
+    class="secondary-button"
+    style="width:100%;margin:12px 0;"
+    bindtap="goProfile"
+  >{{ui.openProfile}}</button>
+  <view wx:if="{{item}}">
+    <view class="page-heading">
+      <view class="tag-row">
+        <text class="tag">{{item.scenarioLabel}}</text>
+        <text class="tag">{{item.statusLabel}}</text>
+      </view>
+      <text class="title case-heading">{{item.title}}</text>
+      <view wx:if="{{item.context.city || item.deadline}}" class="subtitle case-metadata">
+        <text wx:if="{{item.context.city}}">{{item.context.city}}</text>
+        <text wx:if="{{item.deadline}}">{{item.context.city ? ' · ' : ''}}{{ui.deadline}} {{item.deadline}}</text>
+      </view>
+    </view>
+    <button
+      class="primary-button"
+      style="width:100%;margin:0 0 12px;"
+      bindtap="resume"
+      disabled="{{loading || saving}}"
+    >{{caseWritable ? ui.continueCase : ui.reopenAndContinue}} →</button>
+    <text wx:if="{{!caseWritable}}" class="notice">{{ui.closedCaseHint}}</text>
+    <button
+      class="disclosure-button"
+      style="width:100%;margin:0;"
+      bindtap="toggleContext"
+      disabled="{{loading || saving || !caseWritable}}"
+    >
+      <text>{{ui.context}}</text>
+      <text>{{editContext ? '−' : ui.edit}}</text>
+    </button>
+    <form wx:if="{{editContext}}" class="card" bindsubmit="saveContext">
+      <text class="field-label">{{ui.caseTitle}}</text>
+      <input class="input" name="title" value="{{item.title}}" maxlength="160" />
+      <text class="field-label">{{ui.city}}</text>
+      <input class="input" name="city" value="{{item.context.city}}" maxlength="100" />
+      <text class="field-label">{{ui.purpose}}</text>
+      <input class="input" name="purpose" value="{{item.context.purpose}}" maxlength="160" />
+      <text class="field-label">{{ui.institution}}</text>
+      <input
+        class="input"
+        name="institution"
+        value="{{item.context.institution}}"
+        maxlength="160"
+      />
+      <text class="field-label">{{ui.deadline}}</text>
+      <picker mode="date" value="{{due}}" bindchange="onDate">
+        <view class="picker-value">{{due || ui.noDeadline}} ⌄</view>
+      </picker>
+      <button wx:if="{{due}}" class="text-button" style="width:auto;margin:0;" bindtap="clearDate">{{ui.resetDate}}</button>
+      <button
+        class="primary-button"
+        style="width:100%;margin:14px 0 0;"
+        form-type="submit"
+        disabled="{{loading || saving || !caseWritable}}"
+      >{{ui.save}}</button>
+    </form>
+    <view class="section-heading">
+      <text class="section-title">{{ui.tasks}}</text>
+      <text class="muted">{{item.completedTasks}} / {{item.taskCount}}</text>
+    </view>
+    <button wx:if="{{item.hasPlan}}" style="width:100%;margin:0;" class="text-button" bindtap="openPlan">{{ui.openPlan}}</button>
+    <view class="progress-track">
+      <view class="progress-fill" style="width:{{item.progress}}%;"></view>
+    </view>
+    <text wx:if="{{!item.taskCount}}" class="notice">{{ui.noTasks}}</text>
+    <view wx:for="{{item.tasks}}" wx:key="task_id" class="action-row">
+      <view class="row">
+        <view class="action-indicator {{item.status === 'done' ? 'action-done' : ''}}">{{item.status === 'done' ? '✓' : '○'}}</view>
+        <view class="row-copy">
+          <text class="card-title" user-select="{{true}}">{{item.title}}</text>
+          <text wx:if="{{item.description}}" class="muted" user-select="{{true}}">{{item.description}}</text>
+        </view>
+      </view>
+      <view class="action-controls">
+        <picker
+          range="{{statusLabels}}"
+          value="{{item.statusIndex}}"
+          disabled="{{loading || saving || !caseWritable}}"
+          data-id="{{item.task_id}}"
+          bindchange="taskStatus"
+        >
+          <view class="action-control">{{ui[item.status]}} ⌄</view>
+        </picker>
+        <picker
+          mode="date"
+          disabled="{{loading || saving || !caseWritable}}"
+          value="{{item.due_at}}"
+          data-id="{{item.task_id}}"
+          bindchange="taskDate"
+        >
+          <view class="action-control">{{item.due_at || ui.noDeadline}} ⌄</view>
+        </picker>
+        <button
+          wx:if="{{item.due_at}}"
+          class="text-button"
+          style="width:auto;margin:0;"
+          data-id="{{item.task_id}}"
+          bindtap="clearTaskDate"
+          disabled="{{loading || saving || !caseWritable}}"
+        >×</button>
+      </view>
+    </view>
+    <view wx:if="{{sectionPages.tasks.total > 20}}" class="section-pager">
+      <button
+        class="text-button"
+        style="width:auto;margin:0;"
+        data-section="tasks"
+        data-direction="-1"
+        bindtap="changePage"
+        disabled="{{loading || saving || !sectionPages.tasks.hasPrevious}}"
+      >← {{ui.previousPage}}</button>
+      <text class="muted">{{sectionPages.tasks.page}} / {{sectionPages.tasks.pageCount}}</text>
+      <button
+        class="text-button"
+        style="width:auto;margin:0;"
+        data-section="tasks"
+        data-direction="1"
+        bindtap="changePage"
+        disabled="{{loading || saving || !sectionPages.tasks.hasNext}}"
+      >{{ui.nextPage}} →</button>
+    </view>
+    <form bindsubmit="addTask" class="add-action">
+      <view class="add-action-row">
+        <view class="add-action-field">
+          <input
+            class="input"
+            name="title"
+            value="{{taskTitle}}"
+            bindinput="onTaskTitleInput"
+            disabled="{{loading || saving || !caseWritable}}"
+            maxlength="200"
+            placeholder="{{ui.addTask}}"
+          />
+        </view>
+        <view class="add-action-submit">
+          <button
+            class="secondary-button"
+            style="width:100%;margin:0;"
+            form-type="submit"
+            disabled="{{loading || saving || !caseWritable}}"
+          >+</button>
+        </view>
+      </view>
+    </form>
+    <button
+      class="text-button"
+      style="width:100%;margin:12px 0;"
+      bindtap="generateChecklist"
+      disabled="{{loading || saving || !caseWritable}}"
+      loading="{{saving}}"
+    >{{ui.generateChecklist}}</button>
+    <view class="section-heading">
+      <text class="section-title">{{ui.documents}}</text>
+      <button
+        class="text-button"
+        style="width:auto;margin:0;"
+        bindtap="toggleDocument"
+        disabled="{{loading || saving || !caseWritable}}"
+      >+</button>
+    </view>
+    <view wx:for="{{item.documents}}" wx:key="document_id" class="list-item">
+      <text class="card-title">{{item.title}}</text>
+      <text class="muted">{{item.created_at}}</text>
+      <text class="body-text" user-select="{{true}}">{{item.text}}{{item.truncated ? '…' : ''}}</text>
+      <button
+        class="text-button"
+        style="width:100%;margin:0;"
+        data-section="documents"
+        data-id="{{item.document_id}}"
+        bindtap="viewFullText"
+      >{{ui.viewFullText}} →</button>
+      <view wx:if="{{caseWritable}}" class="inline-actions">
+        <view>
+          <button
+            class="text-button"
+            style="width:100%;margin:0;"
+            data-id="{{item.document_id}}"
+            bindtap="editDocument"
+            disabled="{{loading || saving}}"
+          >{{ui.edit}}</button>
+        </view>
+        <view>
+          <button
+            class="text-button destructive"
+            style="width:100%;margin:0;"
+            data-id="{{item.document_id}}"
+            bindtap="deleteDocument"
+            disabled="{{loading || saving}}"
+          >{{ui.delete}}</button>
+        </view>
+      </view>
+    </view>
+    <view wx:if="{{sectionPages.documents.total > 5}}" class="section-pager">
+      <button
+        class="text-button"
+        style="width:auto;margin:0;"
+        data-section="documents"
+        data-direction="-1"
+        bindtap="changePage"
+        disabled="{{loading || saving || !sectionPages.documents.hasPrevious}}"
+      >← {{ui.previousPage}}</button>
+      <text class="muted">{{sectionPages.documents.page}} / {{sectionPages.documents.pageCount}}</text>
+      <button
+        class="text-button"
+        style="width:auto;margin:0;"
+        data-section="documents"
+        data-direction="1"
+        bindtap="changePage"
+        disabled="{{loading || saving || !sectionPages.documents.hasNext}}"
+      >{{ui.nextPage}} →</button>
+    </view>
+    <form wx:if="{{showDocument}}" class="card" bindsubmit="saveDocument">
+      <text class="muted">{{ui.documentNotice}}</text>
+      <button
+        class="secondary-button"
+        style="width:100%;margin:12px 0 0;"
+        bindtap="chooseDocumentFile"
+        disabled="{{loading || saving || documentImporting || !caseWritable}}"
+        loading="{{documentImporting}}"
+      >{{documentImporting ? ui.documentFileReading : ui.chooseDocumentFile}}</button>
+      <text class="muted">{{ui.documentFileHelp}}</text>
+      <text wx:if="{{documentFileError}}" class="status-error">{{documentFileError}}</text>
+      <text wx:if="{{documentFileLoaded}}" class="muted">{{ui.documentFileLoaded}}</text>
+      <text class="field-label">{{ui.documentTitle}}</text>
+      <input
+        class="input"
+        name="title"
+        value="{{documentTitle}}"
+        maxlength="160"
+        bindinput="onDocumentTitleInput"
+        disabled="{{loading || saving}}"
+      />
+      <text class="field-label">{{ui.original}}</text>
+      <textarea
+        class="textarea"
+        name="text"
+        value="{{documentText}}"
+        maxlength="12000"
+        bindinput="onDocumentTextInput"
+        disabled="{{loading || saving}}"
+      />
+      <checkbox-group bindchange="confirmDocument">
+        <label class="consent">
+          <checkbox
+            value="reviewed"
+            disabled="{{loading || saving}}"
+            checked="{{documentConfirmed}}"
+            color="#176f61"
+          />
+          <text>{{ui.documentConfirmed}}</text>
+        </label>
+      </checkbox-group>
+      <button
+        class="primary-button"
+        style="width:100%;margin:14px 0 0;"
+        form-type="submit"
+        disabled="{{loading || saving || !documentConfirmed || !caseWritable}}"
+      >{{ui.save}}</button>
+    </form>
+    <text class="section-title">{{ui.timeline}}</text>
+    <view wx:for="{{item.messages}}" wx:key="message_id" class="history-item">
+      <text class="muted">{{item.kind === 'assistant' ? ui.assistant : ui.citizen}} · {{item.created_at}}</text>
+      <view wx:if="{{item.historical}}" class="notice historical-notice">
+        <text class="card-title">{{ui.historicalAnswer}}</text>
+        <text class="body-text">{{ui.historicalNotice}}</text>
+      </view>
+      <text class="body-text" user-select="{{true}}">{{item.text}}{{item.truncated ? '…' : ''}}</text>
+      <button
+        wx:if="{{item.truncated}}"
+        class="text-button"
+        style="width:100%;margin:0;"
+        data-section="messages"
+        data-id="{{item.message_id}}"
+        bindtap="viewFullText"
+      >{{ui.viewFullText}} →</button>
+    </view>
+    <view wx:if="{{sectionPages.messages.total > 10}}" class="section-pager">
+      <button
+        class="text-button"
+        style="width:auto;margin:0;"
+        data-section="messages"
+        data-direction="-1"
+        bindtap="changePage"
+        disabled="{{loading || saving || !sectionPages.messages.hasPrevious}}"
+      >← {{ui.previousPage}}</button>
+      <text class="muted">{{sectionPages.messages.page}} / {{sectionPages.messages.pageCount}}</text>
+      <button
+        class="text-button"
+        style="width:auto;margin:0;"
+        data-section="messages"
+        data-direction="1"
+        bindtap="changePage"
+        disabled="{{loading || saving || !sectionPages.messages.hasNext}}"
+      >{{ui.nextPage}} →</button>
+    </view>
+    <view wx:for="{{item.timeline}}" wx:key="event_id" class="timeline-item">
+      <text class="muted">{{item.created_at}}</text>
+      <text class="body-text">{{item.label || item.summary || item.event_type || item.kind}}</text>
+    </view>
+    <view wx:if="{{sectionPages.timeline.total > 20}}" class="section-pager">
+      <button
+        class="text-button"
+        style="width:auto;margin:0;"
+        data-section="timeline"
+        data-direction="-1"
+        bindtap="changePage"
+        disabled="{{loading || saving || !sectionPages.timeline.hasPrevious}}"
+      >← {{ui.previousPage}}</button>
+      <text class="muted">{{sectionPages.timeline.page}} / {{sectionPages.timeline.pageCount}}</text>
+      <button
+        class="text-button"
+        style="width:auto;margin:0;"
+        data-section="timeline"
+        data-direction="1"
+        bindtap="changePage"
+        disabled="{{loading || saving || !sectionPages.timeline.hasNext}}"
+      >{{ui.nextPage}} →</button>
+    </view>
+    <button
+      wx:if="{{item.status === 'open'}}"
+      class="secondary-button"
+      style="width:100%;margin:24px 0 12px;"
+      data-status="completed"
+      bindtap="setStatus"
+      disabled="{{loading || saving}}"
+    >{{ui.complete}}</button>
+    <button
+      wx:else
+      class="secondary-button"
+      style="width:100%;margin:24px 0 12px;"
+      data-status="open"
+      bindtap="setStatus"
+      disabled="{{loading || saving}}"
+    >{{ui.reopen}}</button>
+    <button
+      wx:if="{{item.status !== 'archived'}}"
+      class="text-button"
+      style="width:100%;margin:0;"
+      data-status="archived"
+      bindtap="setStatus"
+      disabled="{{loading || saving}}"
+    >{{ui.archiveCase}}</button>
+    <button
+      class="text-button destructive"
+      style="width:100%;margin:0;"
+      bindtap="remove"
+      disabled="{{loading || saving}}"
+    >{{ui.delete}}</button>
+  </view>
+  <view wx:if="{{fullTextOpen}}" class="sheet">
+    <view class="sheet-content full-text-sheet">
+      <text class="card-title">{{fullTextTitle}}</text>
+      <scroll-view class="full-text-scroll" scroll-y="{{true}}">
+        <text class="body-text" user-select="{{true}}">{{fullText}}</text>
+      </scroll-view>
+      <view wx:if="{{fullTextCount > 1}}" class="section-pager">
+        <button
+          class="text-button"
+          style="width:auto;margin:0;"
+          data-direction="-1"
+          bindtap="changeFullTextPage"
+          disabled="{{fullTextIndex === 0}}"
+        >← {{ui.previousPage}}</button>
+        <text class="muted">{{fullTextIndex + 1}} / {{fullTextCount}}</text>
+        <button
+          class="text-button"
+          style="width:auto;margin:0;"
+          data-direction="1"
+          bindtap="changeFullTextPage"
+          disabled="{{fullTextIndex + 1 >= fullTextCount}}"
+        >{{ui.nextPage}} →</button>
+      </view>
+      <button class="secondary-button" style="width:100%;margin:18px 0 0;" bindtap="closeFullText">{{ui.close}}</button>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,339 @@
+<view class="page chat-page">
+  <view class="chat-toolbar">
+    <view class="row-copy">
+      <text class="eyebrow">QminiGuide</text>
+      <text class="chat-title">{{caseTitle || ui.chat}}</text>
+    </view>
+    <button
+      class="text-button"
+      style="width:auto;margin:0;"
+      bindtap="newConversation"
+      disabled="{{loading || saving}}"
+    >＋ {{ui.newConversation}}</button>
+  </view>
+  <view class="context-line">
+    <label class="muted">
+      <switch checked="{{useSavedContext}}" bindchange="changeSavedContext"
+        disabled="{{loading || saving || caseLoading}}" color="#167565" />
+      {{caseId ? ui.useCaseContext : ui.useProfileContext}}
+    </label>
+    <button
+      class="context-button"
+      style="width:auto;margin:0;"
+      bindtap="toggleContext"
+      disabled="{{caseLoading || caseStatus !== 'open'}}"
+    >{{ui.context}}<text wx:if="{{context.city}}"> · {{context.city}}</text> ⌄</button>
+    <button
+      wx:if="{{turns.length}}"
+      class="text-button"
+      style="width:auto;margin:0;"
+      bindtap="saveCase"
+      disabled="{{saving || loading || caseLoading}}"
+      loading="{{saving}}"
+    >{{caseSavePending ? ui.retryCaseSave : caseId ? ui.cases : ui.saveCase}}</button>
+  </view>
+  <form wx:if="{{editContext}}" class="card" bindsubmit="saveContext">
+    <text class="field-label">{{ui.city}}</text>
+    <input class="input" name="city" value="{{context.city}}" maxlength="100" />
+    <button class="primary-button" style="width:100%;margin:12px 0 0;" form-type="submit">{{ui.save}}</button>
+  </form>
+  <view wx:if="{{caseId && caseStatus !== 'open'}}" class="notice">
+    <text user-select="{{true}}">{{ui.closedCaseHint}}</text>
+    <button
+      class="text-button"
+      style="width:100%;margin:0;"
+      bindtap="reopenCase"
+      disabled="{{saving || loading || caseLoading}}"
+    >{{ui.reopen}}</button>
+  </view>
+  <text wx:if="{{saveStatus}}" class="notice" user-select="{{true}}">{{saveStatus}}</text>
+  <view wx:if="{{!turns.length}}" class="chat-empty">
+    <text class="title">{{ui.homePrompt}}</text>
+    <view class="sample-row">
+      <button
+        wx:for="{{samples}}"
+        wx:key="labelKey"
+        class="pill"
+        style="width:auto;margin:0;"
+        data-index="{{index}}"
+        bindtap="useSample"
+      >{{ui[item.labelKey]}}</button>
+    </view>
+  </view>
+  <view wx:if="{{hasPreviousTurns || hasNextTurns}}" class="conversation-pages">
+    <text class="muted">{{turnOffset + 1}}–{{turnEnd}} {{ui.of}} {{turnTotal}}</text>
+    <view class="inline-actions">
+      <view>
+        <button
+          class="secondary-button"
+          style="width:100%;margin:0;"
+          bindtap="previousTurns"
+          disabled="{{!hasPreviousTurns}}"
+        >{{ui.previousPage}}</button>
+      </view>
+      <view>
+        <button
+          class="secondary-button"
+          style="width:100%;margin:0;"
+          bindtap="nextTurns"
+          disabled="{{!hasNextTurns}}"
+        >{{ui.nextPage}}</button>
+      </view>
+    </view>
+    <button
+      wx:if="{{hasNextTurns}}"
+      class="text-button"
+      style="width:100%;margin:0;"
+      bindtap="latestTurns"
+    >{{ui.latestMessages}}</button>
+  </view>
+  <view class="conversation">
+    <block wx:for="{{turns}}" wx:for-item="turn" wx:key="id">
+      <view wx:if="{{turn.kind === 'user' || turn.kind === 'note'}}" class="user-message">
+        <text class="body-text" user-select="{{true}}">{{turn.text}}</text>
+        <text wx:if="{{turn.failed}}" class="status-error">{{ui.requestFailed}}</text>
+        <button
+          wx:if="{{turn.fullTextAvailable}}"
+          class="text-button"
+          style="width:100%;margin:0;"
+          data-id="{{turn.id}}"
+          bindtap="viewTurn"
+        >{{ui.viewFullText}}</button>
+      </view>
+      <view wx:elif="{{turn.compactAnswer}}" class="assistant-message">
+        <view class="assistant-mark">Q <text>{{ui.assistant}}</text></view>
+        <view wx:if="{{turn.historical}}" class="notice historical-notice">
+          <text class="card-title">{{ui.historicalAnswer}}</text>
+          <text class="body-text" user-select="{{true}}">{{ui.historicalNotice}}</text>
+        </view>
+        <view class="answer-meta">
+          <text class="tag">{{ui.scenario}} · {{turn.scenarioLabel}}</text>
+          <text class="severity-badge {{turn.highRisk ? 'severity-badge-high' : ''}}">{{ui.risk}} · {{turn.riskBadgeLabel}}</text>
+        </view>
+        <text class="body-text direct-answer" user-select="{{true}}">{{turn.text}}</text>
+        <view wx:if="{{turn.warnings.length}}" class="notice">
+          <text wx:for="{{turn.warnings}}" wx:key="*this" class="status-warning" user-select="{{true}}">{{item}}</text>
+        </view>
+        <button
+          class="text-button"
+          style="width:100%;margin:0;"
+          data-id="{{turn.id}}"
+          bindtap="viewTurn"
+        >{{ui.viewFullText}}</button>
+        <button
+          wx:if="{{turn.highRisk || turn.escalationRecommended}}"
+          class="warning-button"
+          style="width:100%;margin:12px 0;"
+          data-id="{{turn.id}}"
+          bindtap="requestHumanHelpFromSafety"
+        >{{ui.human}}</button>
+      </view>
+      <view wx:elif="{{turn.answerView}}" class="assistant-message">
+        <view class="assistant-mark">Q <text>{{ui.assistant}}</text></view>
+        <view wx:if="{{turn.historical}}" class="notice historical-notice">
+          <text class="card-title">{{ui.historicalAnswer}}</text>
+          <text class="body-text" user-select="{{true}}">{{ui.historicalNotice}}</text>
+        </view>
+        <view class="answer-meta">
+          <text class="tag">{{ui.scenario}} · {{turn.answerView.scenarioLabel}}</text>
+          <text class="severity-badge {{turn.answerView.highRisk ? 'severity-badge-high' : ''}}">{{ui.risk}} · {{turn.answerView.riskBadgeLabel}}</text>
+        </view>
+        <view class="direct-section">
+          <text class="section-title">{{ui.direct}}</text>
+          <text class="body-text direct-answer" user-select="{{true}}">{{turn.answerView.directAnswer || ui.emptyAnswer}}</text>
+        </view>
+        <view
+          wx:if="{{turn.warnings.length || turn.answerView.highRisk}}"
+          class="notice {{turn.answerView.highRisk ? 'danger-panel' : ''}}"
+        >
+          <text wx:if="{{turn.answerView.highRisk}}" class="card-title">{{ui.highRisk}}</text>
+          <text wx:for="{{turn.warnings}}" wx:key="*this" class="status-warning" user-select="{{true}}">{{item}}</text>
+        </view>
+        <view wx:if="{{turn.answerView.reviewedNotes.length}}" class="source-note">
+          <text class="section-title">{{ui.reviewedInterpretation}}</text>
+          <view wx:for="{{turn.answerView.reviewedNotes}}" wx:key="conflictId">
+            <text class="body-text" user-select="{{true}}">{{item.body}}</text>
+            <view class="tag-row">
+              <text wx:for="{{item.sourceIds}}" wx:for-item="sourceId" wx:key="*this" class="tag">{{sourceId}}</text>
+            </view>
+          </view>
+        </view>
+        <view wx:if="{{turn.answerView.recommendedSteps.length}}">
+          <text class="section-title">{{ui.steps}}</text>
+          <view wx:for="{{turn.answerView.recommendedSteps}}" wx:key="title" class="step-item">
+            <text class="step-number">{{index + 1}}</text>
+            <view class="step-content">
+              <text wx:if="{{item.title}}" class="card-title">{{item.title}}</text>
+              <text class="body-text" user-select="{{true}}">{{item.body}}</text>
+            </view>
+          </view>
+        </view>
+        <view wx:if="{{turn.answerView.safetyPolicyNextSteps.length}}" class="safety-steps">
+          <text wx:for="{{turn.answerView.safetyPolicyNextSteps}}" wx:key="*this" class="body-text" user-select="{{true}}">{{item}}</text>
+        </view>
+        <view
+          wx:if="{{turn.answerView.escalationItems.length || turn.answerView.escalationRecommended}}"
+          class="escalation-section"
+        >
+          <text class="section-title">{{ui.escalation}}</text>
+          <text wx:for="{{turn.answerView.escalationItems}}" wx:key="*this" class="status-warning" user-select="{{true}}">{{item}}</text>
+          <button
+            wx:if="{{turn.answerView.escalationRecommended || turn.answerView.highRisk}}"
+            class="warning-button"
+            style="width:100%;margin:14px 0 0;"
+            data-id="{{turn.id}}"
+            bindtap="requestHumanHelpFromSafety"
+          >{{ui.human}}</button>
+        </view>
+        <button
+          wx:if="{{turn.answerView.showSourcePanel}}"
+          class="disclosure-button"
+          style="width:100%;margin:14px 0 0;"
+          data-id="{{turn.id}}"
+          bindtap="toggleSources"
+        >
+          <text>{{turn.historical ? ui.historicalSources : ui.sources}} · {{turn.answerView.sourceNotes.length}}</text>
+          <text>{{turn.sourcesExpanded ? '−' : '+'}}</text>
+        </button>
+        <text wx:if="{{turn.answerView.showSourcePanel && !turn.answerView.sourceNotes.length}}" class="muted" user-select="{{true}}">{{ui.noTrustedCoverage}}</text>
+        <view wx:if="{{turn.answerView.showSourcePanel && turn.sourcesExpanded}}">
+          <view wx:for="{{turn.answerView.sourceNotes}}" wx:key="sourceId" class="source-note">
+            <text class="source-id">[{{item.sourceId}}]</text>
+            <text class="card-title" user-select="{{true}}">{{item.title}}</text>
+            <text class="muted" user-select="{{true}}">{{item.trustLabel}}</text>
+            <text wx:if="{{item.warning}}" class="status-warning" user-select="{{true}}">{{item.warning}}</text>
+            <text wx:if="{{item.publisher}}" class="muted" user-select="{{true}}">{{item.publisher}}</text>
+            <text wx:if="{{item.reviewedAt}}" class="muted" user-select="{{true}}">{{turn.historical ? ui.historicalChecked : ui.checked}}: {{item.reviewedAt}}</text>
+            <text wx:if="{{item.accessedAt}}" class="muted" user-select="{{true}}">{{ui.accessed}}: {{item.accessedAt}}</text>
+            <text wx:if="{{item.url}}" class="source-url" user-select="{{true}}">{{item.url}}</text>
+            <button
+              wx:if="{{item.url}}"
+              class="text-button"
+              style="width:100%;margin:0;"
+              data-turn="{{turn.id}}"
+              data-index="{{index}}"
+              bindtap="copySourceLink"
+            >{{ui.copySource}}</button>
+          </view>
+        </view>
+        <button
+          class="disclosure-button"
+          style="width:100%;margin:0;"
+          data-id="{{turn.id}}"
+          bindtap="toggleDetails"
+        >
+          <text>{{ui.answerDetails}}</text>
+          <text>{{turn.detailsExpanded ? '−' : '+'}}</text>
+        </button>
+        <view wx:if="{{turn.detailsExpanded}}">
+          <text class="section-title">{{ui.checklist}}</text>
+          <view wx:for="{{turn.answerView.checklistItems}}" wx:key="title" class="list-item">
+            <text class="card-title" user-select="{{true}}">{{item.title}}</text>
+            <text class="body-text" user-select="{{true}}">{{item.body}}</text>
+          </view>
+          <text class="section-title">{{turn.historical ? ui.historicalFacts : ui.groundedFacts}}</text>
+          <view wx:for="{{turn.answerView.groundedFacts}}" wx:key="title" class="fact-item">
+            <text wx:if="{{item.title}}" class="card-title" user-select="{{true}}">{{item.title}}</text>
+            <text class="body-text" user-select="{{true}}">{{item.body}}</text>
+            <view class="tag-row">
+              <text wx:for="{{item.sourceIds}}" wx:for-item="sourceId" wx:key="*this" class="tag">{{sourceId}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+      <view wx:else class="assistant-message">
+        <view wx:if="{{turn.historical}}" class="notice historical-notice">
+          <text class="card-title">{{ui.historicalAnswer}}</text>
+          <text class="body-text" user-select="{{true}}">{{ui.historicalNotice}}</text>
+        </view>
+        <text class="muted">{{ui.savedCopy}}</text>
+        <text class="body-text" user-select="{{true}}">{{turn.text}}</text>
+        <button
+          wx:if="{{turn.fullTextAvailable}}"
+          class="text-button"
+          style="width:100%;margin:0;"
+          data-id="{{turn.id}}"
+          bindtap="viewTurn"
+        >{{ui.viewFullText}}</button>
+      </view>
+    </block>
+  </view>
+  <text wx:if="{{caseLoading}}" class="loading-line">{{ui.processing}}</text>
+  <text wx:if="{{loading}}" class="loading-line">{{ui.preparingAnswer}}</text>
+  <text wx:if="{{error}}" class="status-error" user-select="{{true}}">{{error}}</text>
+  <button
+    wx:if="{{accessNeeded}}"
+    class="secondary-button"
+    style="width:100%;margin:12px 0;"
+    bindtap="goProfile"
+  >{{ui.openProfile}}</button>
+  <view wx:if="{{photoDraftContext}}" class="notice">
+    <text class="card-title">{{ui.importedText}}</text>
+    <text wx:if="{{photoDraftContext.part_count > 1}}" class="muted" user-select="{{true}}">{{ui.photoPart}} {{photoDraftContext.part_number}} / {{photoDraftContext.part_count}}. {{ui.photoPartNotice}}</text>
+          <text wx:for="{{photoDraftWarnings}}" wx:key="*this" class="muted" user-select="{{true}}">{{item}}</text>
+  </view>
+  <view id="conversation-end"></view>
+  <form class="composer" bindsubmit="sendMessage">
+    <textarea
+      class="composer-input"
+      name="message"
+      value="{{message}}"
+      maxlength="-1"
+      disabled="{{loading || saving}}"
+      placeholder="{{ui.question}}"
+      bindinput="onMessageInput"
+      auto-height="{{true}}"
+      cursor-spacing="24"
+      adjust-position="{{true}}"
+      show-confirm-bar="{{false}}"
+    />
+    <view class="composer-actions">
+      <button
+        class="photo-button"
+        style="width:auto;margin:0;"
+        bindtap="goPhoto"
+        disabled="{{loading || saving}}"
+      >
+        <image src="/assets/icons/photo-active.png" />
+        <text>{{ui.addPhoto}}</text>
+      </button>
+      <button
+        class="primary-button send-button"
+        style="width:auto;margin:0;"
+        form-type="submit"
+        disabled="{{loading || saving || caseLoading || caseStatus !== 'open'}}"
+        loading="{{loading || caseLoading}}"
+      >{{ui.send}} ↑</button>
+    </view>
+    <text wx:if="{{cloudChatEnabled === true}}" class="composer-hint" user-select="{{true}}">{{ui.cloudChatNotice}}</text>
+  </form>
+  <button class="text-button" style="width:auto;margin:8px 0;" bindtap="goSupport">{{ui.needHelpShort}}</button>
+  <view wx:if="{{fullTurnOpen}}" class="sheet">
+    <view class="sheet-content">
+      <text class="section-title">{{ui.viewFullText}}</text>
+      <text class="muted">{{ui.contentPart}} {{fullTurnPart + 1}} {{ui.of}} {{fullTurnParts}}</text>
+      <scroll-view class="full-turn-scroll" scroll-y="{{true}}">
+        <text class="body-text" user-select="{{true}}">{{fullTurnText}}</text>
+      </scroll-view>
+      <view class="inline-actions">
+        <view>
+          <button
+            class="secondary-button"
+            style="width:100%;margin:12px 0;"
+            bindtap="previousFullTurn"
+            disabled="{{!fullTurnPart}}"
+          >{{ui.previousPart}}</button>
+        </view>
+        <view>
+          <button
+            class="secondary-button"
+            style="width:100%;margin:12px 0;"
+            bindtap="nextFullTurn"
+            disabled="{{fullTurnPart + 1 >= fullTurnParts}}"
+          >{{ui.nextPart}}</button>
+        </view>
+      </view>
+      <button class="text-button" style="width:100%;margin:0;" bindtap="closeFullTurn">{{ui.close}}</button>
+    </view>
+  </view>
+</view>

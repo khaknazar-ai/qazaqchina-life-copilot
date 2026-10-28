@@ -1,0 +1,27 @@
+<view class="page emergency-page">
+  <view class="page-heading">
+    <text class="eyebrow">{{ui.offlineReady}}</text>
+    <text class="title">{{ui.safeNow}}</text>
+  </view>
+  <view class="emergency-basics">
+    <text class="body-text">{{ui.emergencyBasics}}</text>
+  </view>
+  <view class="phrase-card">
+    <text class="field-label">{{ui.phrase}}</text>
+    <text class="phrase-zh" user-select="{{true}}">{{phrase}}</text>
+    <text class="subtitle">{{ui.emergencyPhraseMeaning}}</text>
+    <button class="primary-button" style="width:100%;margin:20px 0 0;" bindtap="showPhrase">{{ui.showCard}}</button>
+  </view>
+  <text class="section-title">{{ui.verifiedContacts}}</text>
+  <text class="body-text">{{ui.noVerifiedContacts}}</text>
+  <text class="notice">{{ui.emergencyNotice}} {{ui.emergencyAuthority}}</text>
+  <button class="text-button" style="width:100%;margin:18px 0 0;" bindtap="goSupport">{{ui.requestHelp}} →</button>
+  <text class="muted">{{ui.queueNotice}}</text>
+  <view wx:if="{{showPhrase}}" class="sheet">
+    <view class="sheet-content">
+      <text class="phrase-zh" user-select="{{true}}">{{phrase}}</text>
+      <text class="subtitle">{{ui.emergencyPhraseMeaning}}</text>
+      <button class="secondary-button" style="width:100%;margin:24px 0 0;" bindtap="closePhrase">{{ui.close}}</button>
+    </view>
+  </view>
+</view>

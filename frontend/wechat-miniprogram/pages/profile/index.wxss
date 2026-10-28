@@ -1,0 +1,18 @@
+.access-form .hint {
+  margin-top: 8px;
+}
+
+.settings-links {
+  margin: 24px 0 12px;
+  border-top: 1px solid #dfe6dc;
+  border-bottom: 1px solid #dfe6dc;
+}
+
+.settings-links button {
+  border-bottom: 1px solid #e5eae1;
+  border-radius: 0;
+}
+
+.destructive {
+  color: #955442;
+}

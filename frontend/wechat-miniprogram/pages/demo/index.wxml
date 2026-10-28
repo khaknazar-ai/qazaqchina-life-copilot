@@ -1,0 +1,43 @@
+<view class="page">
+  <view class="page-heading">
+    <text class="title">{{ui.demo || 'Demo Scenarios'}}</text>
+    <text class="subtitle">{{ui.demoIntro || 'Explore common situations using demonstration material.'}}</text>
+  </view>
+  <view class="demo-intro">
+    <text>{{ui.demoNotice || 'Demo mode: verify important actions against real official sources.'}}</text>
+  </view>
+  <view wx:if="{{error}}" class="card">
+    <text class="status-warning">{{error}}</text>
+  </view>
+  <view wx:if="{{loading}}" class="card">
+    <text class="muted">{{ui.demoLoading || 'Loading demo scenarios'}}...</text>
+  </view>
+  <view wx:if="{{!loading && !scenarios.length}}" class="card">
+    <text class="body-text">{{ui.demoEmpty || 'No examples available yet.'}}</text>
+    <button
+      style="width:100%;margin-left:0;margin-right:0;"
+      class="secondary-button"
+      hover-class="button-pressed"
+      loading="{{loading}}"
+      disabled="{{loading}}"
+      bindtap="loadScenarios"
+    >{{ui.refresh || 'Refresh'}}</button>
+  </view>
+  <view wx:for="{{scenarios}}" wx:key="scenario_id" class="card scenario-card">
+    <text class="eyebrow">{{ui.demo || 'Example'}} · {{index + 1}}</text>
+    <text class="card-title">{{item.displayTitle}}</text>
+    <text class="body-text">{{item.displayDescription}}</text>
+    <view class="tag-row">
+      <text wx:if="{{item.categoryLabel}}" class="tag">{{item.categoryLabel}}</text>
+      <text wx:if="{{item.riskLabel}}" class="tag tag-risk">{{ui.risk || 'Risk level'}}: {{item.riskLabel}}</text>
+    </view>
+    <button
+      style="width:100%;margin-left:0;margin-right:0;"
+      class="secondary-button"
+      hover-class="button-pressed"
+      disabled="{{openingScenarioId !== ''}}"
+      data-id="{{item.scenario_id}}"
+      bindtap="openDetail"
+    >{{ui.demoOpen || 'View example'}} <text class="button-arrow">→</text></button>
+  </view>
+</view>

@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Source review · QminiGuide</title>
+    <link rel="stylesheet" href="/admin/source-conflicts/conflicts.css">
+    <script src="/admin/source-conflicts/conflicts.js" defer></script>
+  </head>
+  <body>
+    <header class="page-header">
+      <div><a class="back-link" href="/admin/source-console">← Source console</a>
+        <a class="back-link" href="/admin/source-corpus">Captured source review</a>
+        <p class="eyebrow">QminiGuide · Editorial workspace</p>
+        <h1>Resolve source conflicts</h1>
+        <p class="subtitle">Compare original evidence, record an interpretation, and review it together.</p>
+      </div>
+      <span class="environment">Internal review</span>
+    </header>
+    <main>
+      <section class="panel access" aria-labelledby="accessHeading">
+        <div><h2 id="accessHeading">Operator access</h2>
+          <p>Use an authenticated reviewer account. Your token stays in this tab’s memory.</p></div>
+        <form id="accessForm" class="access-form">
+          <label for="operatorToken">Operator token</label>
+          <input id="operatorToken" type="password" autocomplete="off" spellcheck="false" required>
+          <button type="submit" id="connectButton">Connect</button>
+          <button type="button" id="disconnectButton" class="secondary">Disconnect</button>
+        </form>
+        <p id="identity" class="muted">Not connected.</p>
+      </section>
+      <p id="message" role="status" aria-live="polite"></p>
+      <div class="workspace">
+        <aside class="panel queue" aria-labelledby="queueHeading">
+          <div class="section-heading"><h2 id="queueHeading">Review queue</h2>
+            <button id="refreshButton" type="button" class="secondary" data-permission="read" disabled>Refresh</button></div>
+          <p class="muted">A suggested conflict is a question for review, not a confirmed contradiction.</p>
+          <div id="caseList" class="case-list"><p class="empty">Connect to view cases.</p></div>
+          <button id="detectButton" type="button" class="secondary wide" data-permission="create" disabled>Find possible conflicts</button>
+          <button id="semanticDetectButton" type="button" class="secondary wide" data-permission="create" disabled>Compare meaning with cloud</button>
+          <p class="muted">Cloud comparison uses one enabled, budgeted model request and produces suggestions for review.</p>
+          <div id="suggestions" class="suggestions"></div>
+        </aside>
+        <div class="main-column">
+          <section class="panel" aria-labelledby="createHeading">
+            <details id="createDetails">
+              <summary id="createHeading">Open a conflict case</summary>
+              <p class="muted">Select two available sources and copy the passages that appear to disagree. Originals are preserved as snapshots.</p>
+              <form id="createForm">
+                <label for="topic">Topic</label><input id="topic" maxlength="240" minlength="3" required>
+                <div class="form-grid">
+                  <div><label for="scenario">Scenario</label><select id="scenario" required>
+                    <option value="documents">Documents</option><option value="housing">Housing</option>
+                    <option value="tourism">Tourism</option><option value="study">Study</option>
+                    <option value="work">Work</option><option value="business">Business</option>
+                    <option value="medical">Medical</option><option value="emergency">Emergency</option>
+                    <option value="payments">Payments</option><option value="transport">Transport</option>
+                    <option value="translation">Translation</option><option value="community_experience">Community experience</option>
+                    <option value="unclear">Unclear</option></select></div>
+                  <div><label for="risk">Risk</label><select id="risk" required>
+                    <option value="normal">Normal</option><option value="medium">Medium</option>
+                    <option value="legal_sensitive">Legal sensitive</option><option value="work_status_sensitive">Work status sensitive</option>
+                    <option value="medical_sensitive">Medical sensitive</option><option value="emergency">Emergency</option>
+                    <option value="unsafe">Unsafe</option><option value="prompt_injection">Prompt injection</option></select></div>
+                </div>
+                <label for="city">City or locality (leave blank for national scope)</label><input id="city" maxlength="120">
+                <label class="check-label"><input id="scopePartitioned" type="checkbox"> Compare separate localities or populations</label>
+                <div class="form-grid comparison">
+                  <div><label for="sourceA">First source</label><select id="sourceA" required></select>
+                    <details><summary>Read original text</summary><pre id="bodyA" class="source-body"></pre></details>
+                    <label for="quoteA">Exact passage</label><textarea id="quoteA" rows="4" required></textarea></div>
+                  <div><label for="sourceB">Second source</label><select id="sourceB" required></select>
+                    <details><summary>Read original text</summary><pre id="bodyB" class="source-body"></pre></details>
+                    <label for="quoteB">Exact passage</label><textarea id="quoteB" rows="4" required></textarea></div>
+                </div>
+                <button type="submit" data-permission="create" disabled>Create case</button>
+              </form>
+            </details>
+          </section>
+          <section id="casePanel" class="panel" aria-labelledby="caseHeading" hidden>
+            <div class="section-heading"><div><p id="caseMeta" class="eyebrow"></p><h2 id="caseHeading"></h2></div><span id="caseStatus" class="badge"></span></div>
+            <p id="scope" class="muted"></p>
+            <p class="rule">Official rules remain authoritative. An expert note explains the evidence within this case’s scope; it cannot replace legislation.</p>
+            <div id="evidence" class="form-grid comparison"></div>
+            <details class="refresh-evidence">
+              <summary>Review updated source versions</summary>
+              <p class="muted">Compare the latest available registry text and select exact passages again. Saving appends new snapshots and opens this case for a new interpretation; earlier evidence stays in history.</p>
+              <form id="refreshSourcesForm"><div id="refreshEvidence" class="form-grid comparison"></div>
+                <button id="refreshSourcesButton" type="submit" data-permission="create" disabled>Save new evidence revision</button>
+              </form>
+            </details>
+            <div id="currentProposal" class="note-preview" hidden></div>
+            <hr>
+            <h3>Propose an interpretation</h3>
+            <form id="proposalForm">
+              <label for="outcome">Conclusion</label><select id="outcome" required>
+                <option value="prefer_source">Use the supported source</option>
+                <option value="different_conditions">The sources describe different conditions</option>
+                <option value="unresolved">The conflict remains unresolved</option>
+              </select>
+              <fieldset id="preferredSources"><legend>Supporting source to prefer</legend></fieldset>
+              <div id="conditionsPanel" hidden>
+                <h4>When each source applies</h4>
+                <p class="muted">Describe separate conditions using exact words from every source in that group. Each group needs official or curated evidence. Unknown or overlapping conditions cannot be approved.</p>
+                <div id="conditionBranches" class="condition-branches"></div>
+              </div>
+              <label for="note">Expert note</label><textarea id="note" rows="5" required></textarea>
+              <label for="proposalReason">Evidence and reasoning</label><textarea id="proposalReason" rows="3" required></textarea>
+              <label for="validUntil">Review again by</label><input id="validUntil" type="datetime-local" required>
+              <p class="muted">Exclude personal details. Source updates or expiry invalidate the interpretation until it is reviewed again.</p>
+              <button type="submit" data-permission="note" disabled>Submit for review</button>
+            </form>
+            <hr>
+            <h3>Review decision</h3>
+            <p class="muted">Approval must come from a different authenticated operator than the note author.</p>
+            <p class="muted">Approve a supported source preference or explicit, disjoint conditions. Unresolved cases stay in review.</p>
+            <label for="decisionReason">Reason for the decision</label><textarea id="decisionReason" rows="2" minlength="3" required></textarea>
+            <div class="button-row">
+              <button id="approveButton" type="button" data-permission="approve" disabled>Approve</button>
+              <button id="rejectButton" type="button" class="secondary" data-permission="approve" disabled>Return for review</button>
+              <button id="revokeButton" type="button" class="danger" data-permission="revoke" disabled>Revoke approval</button>
+            </div>
+          </section>
+          <section id="historyPanel" class="panel" aria-labelledby="historyHeading" hidden>
+            <h2 id="historyHeading">Decision history</h2>
+            <p class="muted">Each revision preserves the authenticated actor, role, time, reason and evidence. Corrections add a new event.</p>
+            <ol id="history" class="timeline"></ol>
+          </section>
+        </div>
+      </div>
+    </main>
+  </body>
+</html>

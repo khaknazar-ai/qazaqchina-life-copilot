@@ -1,0 +1,130 @@
+<view class="page">
+  <view class="page-heading">
+    <text class="title">{{ui.privacy || 'Privacy and data'}}</text>
+    <text class="subtitle">{{ui.privacyIntro || 'Review how data is handled and send a deletion request.'}}</text>
+  </view>
+  <view class="card">
+    <text class="card-title">{{ui.dataStored || 'Data that may be stored'}}</text>
+    <text class="body-text">{{ui.storedDataNotice || 'Chat text, reports, request summaries, source review records, conversation and photo metadata may be stored in this local version.'}}</text>
+    <view class="data-notice">
+      <text class="body-text">{{ui.photosNotStored || 'Raw photos are not stored.'}}</text>
+      <text class="muted">{{ui.textNotEvidence || 'Manual/OCR text is user-provided and not trusted evidence.'}}</text>
+      <text class="muted">{{ui.dataSecretsNotice || 'Avoid unnecessary personal details.'}}</text>
+    </view>
+  </view>
+  <form class="card" bindsubmit="previewRedaction">
+    <text class="card-title">{{ui.redactionPreview || 'Hide personal details'}}</text>
+    <textarea
+      name="redactionText"
+      class="textarea"
+      value="{{redactionText}}"
+      maxlength="12000"
+      disabled="{{redactionLoading}}"
+      placeholder="{{ui.redactionPlaceholder || 'Paste text to preview masking of personal details'}}"
+      bindinput="onRedactionInput"
+    />
+    <button
+      style="width:100%;margin-left:0;margin-right:0;"
+      class="secondary-button"
+      hover-class="button-pressed"
+      form-type="submit"
+      loading="{{redactionLoading}}"
+      disabled="{{redactionLoading}}"
+    >{{ui.previewRedaction || 'Preview masked text'}}</button>
+    <text wx:if="{{redactionError}}" class="status-error">{{redactionError}}</text>
+    <text wx:if="{{redactedText}}" class="redaction-result" user-select="true">{{redactedText}}</text>
+    <text wx:if="{{redactionWarning}}" class="status-warning">{{redactionWarning}}</text>
+  </form>
+  <form class="card" bindsubmit="submitDeleteRequest">
+    <text class="card-title">{{ui.deleteRequest || 'Request deletion'}}</text>
+    <text class="muted">{{ui.deletionReviewNotice || 'Delete requests are reviewed; this is not automatic legal deletion.'}}</text>
+    <view class="choice-grid">
+      <view class="choice-cell" style="width:48%;margin:0 1% 12rpx;">
+        <button
+          style="width:100%;margin:0;"
+          class="choice-button {{targetScope === 'session' ? 'choice-button-selected' : ''}}"
+          hover-class="button-pressed"
+          disabled="{{deleteLoading}}"
+          data-scope="session"
+          bindtap="selectScope"
+        >{{ui.session || 'Conversation'}}</button>
+      </view>
+      <view class="choice-cell" style="width:48%;margin:0 1% 12rpx;">
+        <button
+          style="width:100%;margin:0;"
+          class="choice-button {{targetScope === 'feedback' ? 'choice-button-selected' : ''}}"
+          hover-class="button-pressed"
+          disabled="{{deleteLoading}}"
+          data-scope="feedback"
+          bindtap="selectScope"
+        >{{ui.feedback || 'Feedback'}}</button>
+      </view>
+      <view class="choice-cell" style="width:48%;margin:0 1% 12rpx;">
+        <button
+          style="width:100%;margin:0;"
+          class="choice-button {{targetScope === 'escalation' ? 'choice-button-selected' : ''}}"
+          hover-class="button-pressed"
+          disabled="{{deleteLoading}}"
+          data-scope="escalation"
+          bindtap="selectScope"
+        >{{ui.helpRequests || 'Help requests'}}</button>
+      </view>
+      <view class="choice-cell" style="width:48%;margin:0 1% 12rpx;">
+        <button
+          style="width:100%;margin:0;"
+          class="choice-button {{targetScope === 'all_known_data' ? 'choice-button-selected' : ''}}"
+          hover-class="button-pressed"
+          disabled="{{deleteLoading}}"
+          data-scope="all_known_data"
+          bindtap="selectScope"
+        >{{ui.allData || 'All known data'}}</button>
+      </view>
+    </view>
+    <textarea
+      name="deleteMessage"
+      class="textarea"
+      value="{{deleteMessage}}"
+      maxlength="8000"
+      disabled="{{deleteLoading}}"
+      placeholder="{{ui.deletionPlaceholder || 'Describe the data you want deleted'}}"
+      bindinput="onDeleteMessageInput"
+    />
+    <text class="field-label">{{ui.optionalContact || 'Contact details (optional)'}}</text>
+    <input
+      name="contact"
+      class="input"
+      value="{{contact}}"
+      maxlength="256"
+      disabled="{{deleteLoading}}"
+      placeholder="{{ui.optionalContact || 'Contact details (optional)'}}"
+      bindinput="onContactInput"
+    />
+    <text class="muted">{{ui.contactRedactionNotice || 'Contact details are masked before storage.'}}</text>
+    <button
+      style="width:100%;margin-left:0;margin-right:0;"
+      class="primary-button"
+      hover-class="button-pressed"
+      form-type="submit"
+      loading="{{deleteLoading}}"
+      disabled="{{deleteLoading}}"
+    >{{ui.deleteRequest || 'Submit delete request'}}</button>
+    <text wx:if="{{deleteError}}" class="status-error">{{deleteError}}</text>
+    <text wx:if="{{deleteStatus}}" class="status-success">{{deleteStatus}}</text>
+  </form>
+  <view class="card">
+    <text class="card-title">{{ui.retentionPolicies || 'Storage periods'}}</text>
+    <view wx:for="{{policies}}" wx:key="category" class="list-item">
+      <text class="body-text">{{item.category}} · {{item.default_retention_days}} {{ui.days || 'days'}}</text>
+      <text class="muted">{{item.description}}</text>
+    </view>
+    <button
+      style="width:100%;margin-left:0;margin-right:0;"
+      class="secondary-button"
+      hover-class="button-pressed"
+      loading="{{policyLoading}}"
+      disabled="{{policyLoading}}"
+      bindtap="loadPolicies"
+    >{{ui.refresh || 'Refresh'}}</button>
+    <text wx:if="{{policyError}}" class="status-error">{{policyError}}</text>
+  </view>
+</view>

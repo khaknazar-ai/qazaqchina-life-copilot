@@ -1,0 +1,64 @@
+.photo-progress {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 25px 0;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #e0e6db;
+  color: #5b6e63;
+  font-size: 12px;
+}
+
+.photo-progress .active {
+  color: #28694f;
+  font-weight: 600;
+}
+
+.upload-placeholder {
+  flex-direction: column;
+  gap: 14px;
+  min-height: 215px;
+  padding: 25px;
+  background: #edf2e8;
+  border: 1px dashed #abc6ac;
+  border-radius: 20px;
+  color: #35664c;
+}
+
+.upload-placeholder image {
+  width: 48px;
+  height: 48px;
+}
+
+.upload-placeholder .muted {
+  max-width: 240px;
+  text-align: center;
+  font-weight: 400;
+}
+
+.manual-input {
+  height: 210px;
+  margin-bottom: 10px;
+}
+
+.mode-notice {
+  margin-top: 16px;
+}
+
+.review-input {
+  height: 260px;
+  margin: 16px 0;
+  background: #fff;
+}
+
+.selected-part {
+  max-height: 200px;
+  padding: 14px;
+  background: #edf2e9;
+  margin: 12px 0;
+  border-radius: 12px;
+}
+
+.review-note {
+  margin-top: 15px;
+}

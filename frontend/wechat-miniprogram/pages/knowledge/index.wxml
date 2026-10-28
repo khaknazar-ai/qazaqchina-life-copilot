@@ -1,0 +1,244 @@
+<view class="page">
+  <view class="page-heading">
+    <text class="eyebrow">QminiGuide</text>
+    <text class="title">{{ui.knowledge}}</text>
+  </view>
+  <view class="segmented">
+    <view class="segment">
+      <button
+        class="{{pool === 'official' ? 'selected' : ''}}"
+        style="width:100%;margin:0;"
+        data-pool="official"
+        bindtap="changePool"
+      >{{ui.official}}</button>
+    </view>
+    <view class="segment">
+      <button
+        class="{{pool === 'experience' ? 'selected' : ''}}"
+        style="width:100%;margin:0;"
+        data-pool="experience"
+        bindtap="changePool"
+      >{{ui.experience}}</button>
+    </view>
+  </view>
+  <form bindsubmit="search">
+    <input
+      class="input"
+      name="query"
+      value="{{query}}"
+      maxlength="100"
+      placeholder="{{ui.searchHint}}"
+    />
+    <view class="filter-row">
+      <view class="filter-cell">
+        <picker
+          range="{{scenarioOptions}}"
+          range-key="label"
+          value="{{scenarioIndex}}"
+          bindchange="scenarioChange"
+        >
+          <view class="picker-value">{{scenarioOptions[scenarioIndex].label}} ⌄</view>
+        </picker>
+      </view>
+      <view class="filter-cell">
+        <input
+          class="input"
+          name="city"
+          value="{{city}}"
+          maxlength="100"
+          placeholder="{{ui.city}}"
+        />
+      </view>
+    </view>
+    <button
+      class="secondary-button"
+      style="width:100%;margin:0;"
+      form-type="submit"
+      disabled="{{loading}}"
+    >{{ui.find}}</button>
+  </form>
+  <text wx:if="{{pool === 'experience'}}" class="muted">{{ui.experienceNotice}}</text>
+  <view wx:if="{{pool === 'experience'}}" class="inline-actions">
+    <view>
+      <button
+        class="pill {{mine ? 'mine-active' : ''}}"
+        style="width:100%;margin:0;"
+        bindtap="toggleMine"
+      >{{ui.mine}}</button>
+    </view>
+    <view>
+      <button class="pill" style="width:100%;margin:0;" bindtap="toggleAdd">+ {{ui.addExperience}}</button>
+    </view>
+  </view>
+  <form wx:if="{{showAdd}}" class="card experience-form" bindsubmit="submit">
+    <text class="card-title">{{ui.addExperience}}</text>
+    <text class="muted">{{ui.pendingNotice}}</text>
+    <text class="field-label">{{ui.caseTitle}}</text>
+    <input class="input" name="title" maxlength="160" />
+    <text class="field-label">{{ui.city}}</text>
+    <input class="input" name="experienceCity" value="{{city}}" maxlength="100" />
+    <text class="field-label">{{ui.situation}}</text>
+    <textarea class="textarea" name="situation" maxlength="2000" />
+    <text class="field-label">{{ui.happened}}</text>
+    <textarea class="textarea" name="what_happened" maxlength="3000" />
+    <text class="field-label">{{ui.helped}}</text>
+    <textarea class="textarea" name="what_helped" maxlength="2000" />
+    <checkbox-group bindchange="consent">
+      <label class="consent">
+        <checkbox value="allow" checked="{{allowRetrieval}}" color="#176f61" />
+        <text>{{ui.retrievalConsent}}</text>
+      </label>
+    </checkbox-group>
+    <text class="muted">{{ui.dataSecretsNotice}}</text>
+    <button
+      class="primary-button"
+      style="width:100%;margin:16px 0 0;"
+      form-type="submit"
+      disabled="{{saving}}"
+      loading="{{saving}}"
+    >{{ui.send}}</button>
+  </form>
+  <text wx:if="{{status}}" class="status-success">{{status}}</text>
+  <view wx:if="{{examples.length}}" class="example-list">
+    <text class="section-title">{{ui.examplePeople}}</text>
+    <text class="muted">{{ui.examplePeopleHint}}</text>
+    <view wx:for="{{examples}}" wx:key="id" class="example-card">
+      <view class="example-author">
+        <view class="example-avatar">{{item.initial}}</view>
+        <view class="example-byline">
+          <text class="example-name">{{item.author}}</text>
+          <text class="muted example-meta">{{item.role}} · {{item.city}}</text>
+        </view>
+        <text class="tag">{{ui.example}}</text>
+      </view>
+      <button class="entry-title" style="width:100%;margin:0;" bindtap="expandExample" data-id="{{item.id}}">
+        {{item.title}} <text>{{expandedExampleId === item.id ? '−' : '+'}}</text>
+      </button>
+      <text class="body-text {{expandedExampleId === item.id ? '' : 'example-preview'}}">{{item.body}}</text>
+    </view>
+  </view>
+  <text wx:if="{{error && !(accessNeeded && examples.length)}}" class="status-error">{{error}}</text>
+  <button
+    wx:if="{{accessNeeded && !examples.length}}"
+    class="secondary-button"
+    style="width:100%;margin:12px 0;"
+    bindtap="goProfile"
+  >{{ui.openProfile}}</button>
+  <text wx:if="{{loading}}" class="loading-line">{{ui.processing}}</text>
+  <block wx:if="{{pool === 'official'}}">
+    <view wx:for="{{sources}}" wx:key="source_id" class="library-entry">
+      <view class="row">
+        <text class="tag">{{item.source_type === 'official' ? ui.official : ui.checked}}</text>
+        <text wx:if="{{item.city}}" class="muted">{{item.city}}</text>
+      </view>
+      <button
+        class="entry-title"
+        style="width:100%;margin:0;"
+        data-id="{{item.source_id}}"
+        bindtap="expand"
+      >{{item.title}} <text>{{expandedId === item.source_id ? '−' : '+'}}</text></button>
+      <text wx:if="{{item.reviewed_at}}" class="muted">{{ui.checked}}: {{item.reviewed_at}}</text>
+      <view wx:if="{{expandedId === item.source_id}}">
+        <text class="body-text entry-body" user-select="{{true}}">{{expandedText}}</text>
+        <view wx:if="{{partCount > 1}}" class="content-pagination">
+          <text class="muted">{{ui.contentPart}} {{partIndex + 1}} {{ui.of}} {{partCount}}</text>
+          <view class="pagination-actions">
+            <view>
+              <button
+                class="secondary-button"
+                style="width:100%;margin:0;"
+                bindtap="changePart"
+                data-direction="-1"
+                disabled="{{partIndex === 0}}"
+              >{{ui.previousPart}}</button>
+            </view>
+            <view>
+              <button
+                class="secondary-button"
+                style="width:100%;margin:0;"
+                bindtap="changePart"
+                data-direction="1"
+                disabled="{{partIndex + 1 >= partCount}}"
+              >{{ui.nextPart}}</button>
+            </view>
+          </view>
+        </view>
+        <button
+          wx:if="{{expandedHasUrl}}"
+          class="text-button"
+          style="width:100%;margin:8px 0 0;"
+          data-id="{{item.source_id}}"
+          bindtap="copySource"
+        >{{ui.copySource}}</button>
+      </view>
+    </view>
+  </block>
+  <block wx:else>
+    <view wx:for="{{posts}}" wx:key="post_id" class="library-entry">
+      <view class="row">
+        <text class="tag">{{mine ? ui[item.moderation_status] : ui.experience}}</text>
+        <text class="muted">{{item.city}}</text>
+      </view>
+      <button
+        class="entry-title"
+        style="width:100%;margin:0;"
+        data-id="{{item.post_id}}"
+        bindtap="expand"
+      >{{item.title}} <text>{{expandedId === item.post_id ? '−' : '+'}}</text></button>
+      <text class="muted">{{item.created_at}}</text>
+      <view wx:if="{{expandedId === item.post_id}}">
+        <text class="body-text entry-body" user-select="{{true}}">{{expandedText}}</text>
+        <view wx:if="{{partCount > 1}}" class="content-pagination">
+          <text class="muted">{{ui.contentPart}} {{partIndex + 1}} {{ui.of}} {{partCount}}</text>
+          <view class="pagination-actions">
+            <view>
+              <button
+                class="secondary-button"
+                style="width:100%;margin:0;"
+                bindtap="changePart"
+                data-direction="-1"
+                disabled="{{partIndex === 0}}"
+              >{{ui.previousPart}}</button>
+            </view>
+            <view>
+              <button
+                class="secondary-button"
+                style="width:100%;margin:0;"
+                bindtap="changePart"
+                data-direction="1"
+                disabled="{{partIndex + 1 >= partCount}}"
+              >{{ui.nextPart}}</button>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </block>
+  <view wx:if="{{pageCount > 1}}" class="collection-pagination">
+    <text class="muted">{{ui.pageLabel}} {{pageNumber}} {{ui.of}} {{pageCount}}</text>
+    <view class="pagination-actions">
+      <view>
+        <button
+          class="secondary-button"
+          style="width:100%;margin:0;"
+          bindtap="previousPage"
+          disabled="{{loading || !hasPrevious}}"
+        >{{ui.previousPage}}</button>
+      </view>
+      <view>
+        <button
+          class="secondary-button"
+          style="width:100%;margin:0;"
+          bindtap="nextPage"
+          disabled="{{loading || !hasNext}}"
+        >{{ui.nextPage}}</button>
+      </view>
+    </view>
+  </view>
+  <view
+    wx:if="{{!loading && !error && !examples.length && (pool === 'official' ? !sources.length : !posts.length)}}"
+    class="empty"
+  >
+    <text class="muted">{{ui.noSources}}</text>
+  </view>
+</view>

@@ -1,0 +1,135 @@
+<view class="page photo-page">
+  <view class="page-heading">
+    <text class="eyebrow">QminiGuide</text>
+    <text class="title">{{ui.photo}}</text>
+    <text class="subtitle">{{ui.photoSubtitle}}</text>
+  </view>
+  <view class="photo-progress">
+    <text class="{{!result ? 'active' : ''}}">1 · {{ui.photoStep1}}</text>
+    <text class="{{result ? 'active' : ''}}">2 · {{ui.photoStep2}}</text>
+    <text>3 · {{ui.photoStep3}}</text>
+  </view>
+  <form wx:if="{{!result || result.accepted === false}}" bindsubmit="previewPhoto">
+    <view wx:if="{{!manualMode}}" class="photo-select-card">
+      <image
+        wx:if="{{selectedImagePath}}"
+        class="photo-preview"
+        src="{{selectedImagePath}}"
+        mode="widthFix"
+      />
+      <button
+        wx:else
+        class="upload-placeholder"
+        style="width:100%;margin:0;"
+        bindtap="chooseImage"
+        disabled="{{loading || choosingImage}}"
+        loading="{{choosingImage}}"
+      >
+        <image src="/assets/icons/photo-active.png" />
+        <text>{{ui.chooseImage}}</text>
+        <text class="muted">{{ui.photoSelectionHint}}</text>
+      </button>
+      <button
+        wx:if="{{selectedImagePath}}"
+        class="text-button"
+        style="width:100%;margin:0;"
+        bindtap="chooseImage"
+        disabled="{{loading || choosingImage}}"
+      >{{ui.chooseImage}}</button>
+    </view>
+    <view wx:else>
+      <text class="field-label">{{ui.manualEntry}}</text>
+      <textarea
+        class="textarea manual-input"
+        name="manualTranscription"
+        maxlength="-1"
+        disabled="{{loading || choosingImage}}"
+        value="{{manualTranscription}}"
+        placeholder="{{ui.manualPlaceholder}}"
+        bindinput="onManualInput"
+      />
+      <text class="muted">{{ui.manualInputLimit}}</text>
+    </view>
+    <button
+      class="text-button"
+      style="width:100%;margin:10px 0;"
+      bindtap="toggleManual"
+      disabled="{{loading || choosingImage}}"
+    >{{manualMode ? ui.backToPhoto : ui.manualAlternative}}</button>
+    <text class="muted">{{ui.photoPrivacyBody}}</text>
+    <view wx:if="{{!manualMode && selectedImagePath && cloudProcessing}}" class="consent-card">
+      <checkbox-group bindchange="onCloudConsent">
+        <label class="consent">
+          <checkbox
+            value="allow"
+            color="#176f61"
+            checked="{{cloudConsent}}"
+            disabled="{{loading || choosingImage}}"
+          />
+          <text>{{ui.cloudPhotoConsent}}</text>
+        </label>
+      </checkbox-group>
+    </view>
+    <button
+      wx:if="{{manualMode || selectedImagePath || demoImageSelected}}"
+      class="primary-button"
+      style="width:100%;margin:18px 0 12px;"
+      form-type="submit"
+      disabled="{{loading || choosingImage}}"
+      loading="{{loading}}"
+    >{{loading ? ui.photoProcessing : manualMode ? ui.manualProcess : ui.previewPhoto}}</button>
+    <text wx:if="{{!manualMode}}" class="muted mode-notice">{{modeKnown ? (cloudProcessing ? ui.photoModeCloud : localProcessing ? ui.photoModeLocal : localUnavailable ? ui.photoLocalUnavailable : ui.photoModeDemo) : ui.photoModeUnavailable}}</text>
+    <button
+      wx:if="{{modeKnown && !cloudProcessing && !localProcessing && !localUnavailable && !manualMode}}"
+      class="text-button"
+      style="width:100%;margin:6px 0;"
+      bindtap="useDemoImage"
+      disabled="{{loading || choosingImage}}"
+    >{{ui.demoImage}}</button>
+  </form>
+  <form
+    wx:if="{{result && result.accepted !== false}}"
+    class="review-section"
+    bindsubmit="explainReviewedText"
+  >
+    <text class="card-title">{{ui.reviewText}}</text>
+    <text class="muted">{{ui.reviewTextHint}}</text>
+    <text class="notice">{{statusText}}</text>
+    <textarea
+      class="textarea review-input"
+      name="editableExtractedText"
+      maxlength="-1"
+      value="{{editableExtractedText}}"
+      placeholder="{{ui.reviewPlaceholder}}"
+      bindinput="onExtractedTextInput"
+      disabled="{{loading}}"
+    />
+    <view wx:if="{{photoPartOptions.length > 1}}" class="part-section">
+      <text class="status-warning">{{ui.photoPartNotice}}</text>
+      <picker
+        range="{{photoPartOptions}}"
+        value="{{photoPartIndex}}"
+        bindchange="onPhotoPartChange"
+      >
+        <view class="picker-value">{{ui.photoPart}} {{photoPartNumber}} / {{photoPartOptions.length}} ⌄</view>
+      </picker>
+      <scroll-view class="selected-part" scroll-y="{{true}}">
+        <text class="body-text" user-select="{{true}}">{{selectedPhotoText}}</text>
+      </scroll-view>
+    </view>
+    <view wx:if="{{privacyWarnings.length || safetyWarnings.length}}" class="notice warning-panel">
+      <text wx:for="{{privacyWarnings}}" wx:key="*this" class="status-warning">{{item}}</text>
+      <text wx:for="{{safetyWarnings}}" wx:key="*this" class="status-warning">{{item}}</text>
+    </view>
+    <text class="muted review-note">{{ui.untrustedText}}</text>
+    <button class="primary-button" style="width:100%;margin:18px 0 12px;" form-type="submit">{{ui.reviewAndExplain}}</button>
+    <button
+      class="secondary-button"
+      style="width:100%;margin:0 0 12px;"
+      bindtap="useExtractedTextInChat"
+    >{{ui.photoToChat}}</button>
+    <text class="muted">{{ui.photoToDraftNotice}}</text>
+    <button class="text-button" style="width:100%;margin:14px 0 0;" bindtap="restartInput">{{ui.backToInput}}</button>
+  </form>
+  <text wx:if="{{error}}" class="status-error">{{error}}</text>
+</view>

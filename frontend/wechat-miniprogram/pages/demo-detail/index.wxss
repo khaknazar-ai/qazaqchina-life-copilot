@@ -1,0 +1,46 @@
+.numbered-step {
+  display: flex;
+  align-items: flex-start;
+  padding: 18rpx 0;
+}
+
+.step-number {
+  flex: 0 0 44rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44rpx;
+  height: 44rpx;
+  margin: 4rpx 18rpx 0 0;
+  border-radius: 50%;
+  background: #E8F3ED;
+  color: #166B61;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.step-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.source-note {
+  margin-top: 18rpx;
+  padding: 22rpx;
+  border: 1rpx solid #DFE8E2;
+  border-radius: 18rpx;
+  background: #F7FAF7;
+}
+
+.source-url {
+  display: block;
+  margin: 12rpx 0 20rpx;
+  color: #5E726B;
+  font-size: 13px;
+  line-height: 1.5;
+  word-break: break-all;
+}
+
+.primary-button {
+  margin-top: 24rpx;
+}

@@ -1,0 +1,30 @@
+.case-row {
+  padding: 19px;
+  margin-bottom: 15px;
+  border: 1px solid #e1e8dc;
+  border-radius: 18px;
+  background: #fff;
+}
+
+.case-title {
+  display: block;
+  font-size: 19px;
+  font-weight: 600;
+  line-height: 1.4;
+  margin: 12px 0 8px;
+}
+
+.next-action {
+  display: block;
+  color: #4c6e59;
+  font-size: 14px;
+  margin-top: 13px;
+}
+
+.row .title {
+  flex: 1;
+}
+
+.pill {
+  max-width: 45%;
+}

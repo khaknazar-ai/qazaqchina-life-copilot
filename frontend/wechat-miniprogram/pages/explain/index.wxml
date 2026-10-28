@@ -1,0 +1,135 @@
+<view class="page explain-page">
+  <view class="page-heading">
+    <text class="eyebrow">QminiGuide</text>
+    <text class="title">{{ui.explain}}</text>
+    <text class="subtitle">{{ui.explanationIntro}}</text>
+  </view>
+  <text wx:if="{{partContext && partContext.part_count > 1}}" class="notice">{{ui.photoPart}} {{partContext.part_number}} / {{partContext.part_count}}. {{ui.photoPartNotice}}</text>
+  <form wx:if="{{!response}}" bindsubmit="explainText">
+    <text class="field-label">{{ui.original}}</text>
+    <textarea
+      class="textarea explain-input"
+      name="text"
+      value="{{text}}"
+      maxlength="12000"
+      placeholder="{{ui.noticeText}}"
+      bindinput="onTextInput"
+      disabled="{{loading}}"
+    />
+    <text class="muted input-hint" user-select="{{true}}">{{ui.dataSecretsNotice}} {{ui.documentLimit}}</text>
+    <view wx:if="{{documentPartOptions.length > 1}}" class="document-parts">
+      <text class="notice">{{ui.documentLimit}}</text>
+      <picker
+        range="{{documentPartOptions}}"
+        value="{{documentPartIndex}}"
+        bindchange="selectDocumentPart"
+      >
+        <view class="picker-value">{{ui.photoPart}} {{documentPartIndex + 1}} / {{documentPartOptions.length}} ⌄</view>
+      </picker>
+      <scroll-view class="document-part-preview" scroll-y="{{true}}">
+        <text class="body-text" user-select="{{true}}">{{selectedDocumentText}}</text>
+      </scroll-view>
+    </view>
+    <button
+      class="primary-button"
+      style="width:100%;margin:18px 0 0;"
+      form-type="submit"
+      loading="{{loading}}"
+      disabled="{{loading}}"
+    >{{loading ? ui.processing : ui.explainAction}}</button>
+    <button
+      class="text-button"
+      style="width:100%;margin:10px 0;"
+      bindtap="useSample"
+      disabled="{{loading}}"
+    >{{ui.sampleNotice}}</button>
+  </form>
+  <text wx:if="{{error}}" class="status-error">{{error}}</text>
+  <view wx:if="{{response}}">
+    <text wx:if="{{reviewedScope && (reviewedScope.part_count > 1 || reviewedScope.origin_part_count > 1)}}" class="notice">{{ui.photoPart}} {{reviewedScope.part_number}} / {{reviewedScope.part_count}}. {{ui.photoPartNotice}} {{ui.documentLimit}}</text>
+    <view class="translation-status">
+      <text class="tag">{{response.mode === 'cloud_verified' ? ui.modelReviewed : ui.limitedAnalysis}}</text>
+      <button
+        wx:if="{{explanationView.notices.length}}"
+        class="notice-info-button"
+        style="width:auto;margin:0;"
+        bindtap="toggleNotices"
+        aria-label="{{noticesExpanded ? ui.hideDetails : ui.showDetails}}"
+        aria-expanded="{{noticesExpanded}}"
+      ><text class="notice-info-icon">i</text></button>
+    </view>
+    <view wx:if="{{noticesExpanded && explanationView.notices.length}}" class="notice warning-panel">
+      <text wx:for="{{explanationView.notices}}" wx:key="*this" class="status-warning" user-select="{{true}}">{{item}}</text>
+    </view>
+    <text wx:if="{{explanationView.summary || explanationView.explanation}}" class="section-title">{{ui.translation}}</text>
+    <text
+      wx:if="{{explanationView.summary}}"
+      class="body-text explanation-text"
+      user-select="{{true}}"
+    >{{explanationView.summary}}</text>
+    <text wx:if="{{explanationView.explanation}}" class="body-text explanation-text" user-select="{{true}}">{{explanationView.explanation}}</text>
+    <view wx:if="{{response.segments.length}}" class="segments">
+      <view wx:for="{{response.segments}}" wx:key="passage_id" class="segment-pair">
+        <text class="segment-original" user-select="{{true}}">{{item.original_quote}}</text>
+        <text class="body-text" user-select="{{true}}">{{item.translation}}</text>
+      </view>
+    </view>
+    <view wx:if="{{response.required_actions.length}}">
+      <text class="section-title">{{ui.steps}}</text>
+      <view wx:for="{{response.required_actions}}" wx:key="*this" class="step-item">
+        <text class="step-number">{{index + 1}}</text>
+        <text class="body-text step-content" user-select="{{true}}">{{item}}</text>
+      </view>
+    </view>
+    <button class="disclosure-button" style="width:100%;margin:0;" bindtap="toggleOriginal">
+      <text>{{ui.original}}</text>
+      <text>{{originalExpanded ? '−' : '+'}}</text>
+    </button>
+    <view wx:if="{{originalExpanded}}">
+      <text class="body-text original-text" user-select="{{true}}">{{response.original_text || text}}</text>
+      <view wx:for="{{response.key_terms}}" wx:key="term" class="list-item">
+        <text class="body-text" user-select="{{true}}">{{item}}</text>
+      </view>
+    </view>
+    <view wx:if="{{response.suggested_reply_zh}}" class="phrase-editor">
+      <text class="section-title">{{ui.phrase}}</text>
+      <text class="muted">{{ui.phraseHint}}</text>
+      <textarea
+        class="textarea phrase-input"
+        value="{{phrase}}"
+        maxlength="2000"
+        bindinput="onPhraseInput"
+      />
+      <text wx:if="{{phraseMeaning}}" class="muted">{{phraseMeaning}}</text>
+      <text wx:else class="muted">{{ui.editedPhraseNotice}}</text>
+      <view class="inline-actions">
+        <view>
+          <button
+            class="primary-button"
+            style="width:100%;margin:0;"
+            bindtap="showPhrase"
+            disabled="{{!phrase}}"
+          >{{ui.showCard}}</button>
+        </view>
+        <view>
+          <button
+            class="secondary-button"
+            style="width:100%;margin:0;"
+            bindtap="copyPhrase"
+            disabled="{{!phrase}}"
+          >{{ui.copyPhrase}}</button>
+        </view>
+      </view>
+    </view>
+    <button class="text-button" style="width:100%;margin:20px 0 0;" bindtap="goChat">{{ui.photoToChat}} →</button>
+    <button class="text-button" style="width:100%;margin:0;" bindtap="changeText">{{ui.backToInput}}</button>
+  </view>
+  <view wx:if="{{showPhrase}}" class="sheet">
+    <view class="sheet-content">
+      <text class="eyebrow">Q · {{ui.phrase}}</text>
+      <text class="phrase-zh" user-select="{{true}}">{{phrase}}</text>
+      <text wx:if="{{phraseMeaning}}" class="subtitle">{{phraseMeaning}}</text>
+      <button class="secondary-button" style="width:100%;margin:24px 0 0;" bindtap="closePhrase">{{ui.close}}</button>
+    </view>
+  </view>
+</view>

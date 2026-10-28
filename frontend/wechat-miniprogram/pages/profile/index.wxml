@@ -1,0 +1,114 @@
+<view class="page">
+  <view class="page-heading">
+    <text class="eyebrow">QminiGuide</text>
+    <text class="title">{{ui.profile}}</text>
+  </view>
+  <text class="section-title">{{ui.language}}</text>
+  <picker range="{{languageLabels}}" value="{{languageIndex}}" bindchange="onLanguageChange">
+    <view class="picker-value">{{languageLabels[languageIndex]}} ⌄</view>
+  </picker>
+  <view class="section-heading">
+    <text class="section-title">{{ui.access}}</text>
+    <button wx:if="{{accessReady}}" class="text-button" style="width:auto;margin:0;" bindtap="disconnectPilot">{{ui.pilotDisconnect}}</button>
+  </view>
+  <view wx:if="{{localSigninAvailable}}" class="access-form">
+    <text class="hint">{{ui.accountType}}</text>
+    <view class="row">
+      <button class="{{selectedAccount === 'citizen' ? 'primary-button' : 'secondary-button'}}" data-role="citizen" bindtap="selectAccount" disabled="{{accessLoading}}" style="width:100%;margin:12px 0;">{{ui.citizen}}</button>
+      <button class="{{selectedAccount === 'consul' ? 'primary-button' : 'secondary-button'}}" data-role="consul" bindtap="selectAccount" disabled="{{accessLoading}}" style="width:100%;margin:12px 0;">{{ui.consul}}</button>
+    </view>
+    <button
+      wx:if="{{!accessReady}}"
+      class="primary-button"
+      style="width:100%;margin:12px 0;"
+      bindtap="connectLocal"
+      loading="{{accessLoading}}"
+      disabled="{{accessLoading}}"
+    >{{ui.localSignin}}</button>
+    <text wx:if="{{accessLoading}}" class="hint">{{ui.localSigninWaiting}}</text>
+    <text wx:if="{{accessError}}" class="status-error">{{accessError}}</text>
+  </view>
+  <view wx:elif="{{accessModeLoaded}}">
+    <text class="notice">{{ui.signinNotConfigured}}</text>
+    <button class="text-button" style="width:auto;margin:0;" bindtap="toggleTechnicalAccess">{{ui.technicalAccess}}</button>
+  </view>
+  <form wx:if="{{!accessReady && !localSigninAvailable && showTechnicalAccess}}" bindsubmit="connectPilot" class="access-form">
+    <input
+      class="input"
+      name="accessCode"
+      password="{{true}}"
+      value="{{accessCode}}"
+      maxlength="256"
+      placeholder="{{ui.pilotAccess}}"
+      bindinput="onAccessCodeInput"
+    />
+    <text class="hint">{{ui.pilotNotice}}</text>
+    <button
+      class="secondary-button"
+      style="width:100%;margin:12px 0 0;"
+      form-type="submit"
+      loading="{{accessLoading}}"
+      disabled="{{accessLoading}}"
+    >{{ui.pilotConnect}}</button>
+    <text wx:if="{{accessError}}" class="status-error">{{accessError}}</text>
+  </form>
+  <text wx:if="{{session && !session.persistent}}" class="notice">{{ui.sessionOnly}}</text>
+  <view class="divider"></view>
+  <form bindsubmit="saveProfile">
+    <text class="section-title">{{account.account_type === 'consul' ? ui.consulProfile : ui.preferences}}</text>
+    <text class="field-label">{{ui.displayName}}</text>
+    <input class="input" name="display_name" maxlength="100" value="{{profile.display_name}}" />
+    <text class="field-label">{{ui.city}}</text>
+    <input
+      class="input"
+      name="city"
+      maxlength="100"
+      value="{{profile.city}}"
+      placeholder="{{ui.city}}"
+    />
+    <view wx:if="{{account.account_type !== 'consul'}}">
+    <text class="field-label">{{ui.purpose}}</text>
+    <input
+      class="input"
+      name="purpose"
+      maxlength="160"
+      value="{{profile.purpose}}"
+      placeholder="{{ui.purpose}}"
+    />
+    </view>
+    <text class="field-label">{{account.account_type === 'consul' ? ui.consulate : ui.institution}}</text>
+    <input class="input" name="institution" maxlength="160" value="{{profile.institution}}" />
+    <view wx:if="{{account.account_type === 'consul'}}">
+      <text class="field-label">{{ui.position}}</text>
+      <input class="input" name="position" maxlength="100" value="{{profile.position}}" />
+    </view>
+    <button
+      class="primary-button"
+      style="width:100%;margin:18px 0 0;"
+      form-type="submit"
+      loading="{{saving}}"
+      disabled="{{saving || loading}}"
+    >{{ui.save}}</button>
+    <text wx:if="{{saved}}" class="status-success">{{ui.saved}}</text>
+  </form>
+  <text wx:if="{{error}}" class="status-error">{{error}}</text>
+  <view class="settings-links">
+    <button class="disclosure-button" style="width:100%;margin:0;" bindtap="goPrivacy">
+      <text>{{ui.privacy}}</text>
+      <text>→</text>
+    </button>
+    <button wx:if="{{account.account_type === 'consul'}}" class="disclosure-button" style="width:100%;margin:0;" bindtap="goConsul">
+      <text>{{ui.consulRequests}}</text><text>→</text>
+    </button>
+    <button wx:else class="disclosure-button" style="width:100%;margin:0;" bindtap="goSupport">
+      <text>{{ui.support}}</text>
+      <text>→</text>
+    </button>
+    <button class="disclosure-button" style="width:100%;margin:0;" bindtap="goDemo">
+      <text>{{ui.demo}}</text>
+      <text>→</text>
+    </button>
+  </view>
+  <button class="text-button" style="width:100%;margin:0;" bindtap="clearProfile">{{ui.clearProfile}}</button>
+  <button class="text-button destructive" style="width:100%;margin:0;" bindtap="clearDevice">{{ui.clearDevice}}</button>
+</view>

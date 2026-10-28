@@ -1,0 +1,85 @@
+<view class="page">
+  <view class="page-heading">
+    <text class="title">{{ui.checklist || 'Checklist'}}</text>
+    <text class="subtitle">{{ui.checklistIntro || 'Prepare the essentials for your situation.'}}</text>
+  </view>
+  <view class="card">
+    <label class="muted"><switch checked="{{useProfile}}" bindchange="useProfile" disabled="{{loading || saving}}" />
+      {{caseId ? ui.useCaseContext : ui.useProfileContext}}</label>
+    <text wx:if="{{appliedContext.city}}" class="muted">{{appliedContext.city}}</text>
+    <text wx:if="{{appliedContext.purpose}}" class="muted">{{appliedContext.purpose}}</text>
+    <text wx:if="{{appliedContext.institution}}" class="muted">{{appliedContext.institution}}</text>
+    <text wx:if="{{appliedContext.deadline}}" class="muted">{{ui.yourDeadline}} · {{appliedContext.deadline}}</text>
+    <view wx:if="{{!caseId}}">
+      <text class="field-label">{{ui.city}}</text>
+      <input class="input" value="{{city}}" placeholder="{{appliedContext.city}}" maxlength="100" data-field="city" bindinput="editField" />
+      <text class="field-label">{{ui.purpose}}</text>
+      <input class="input" value="{{purpose}}" placeholder="{{appliedContext.purpose}}" maxlength="300" data-field="purpose" bindinput="editField" />
+      <text class="field-label">{{ui.institution}}</text>
+      <input class="input" value="{{institution}}" placeholder="{{appliedContext.institution}}" maxlength="200" data-field="institution" bindinput="editField" />
+      <text class="field-label">{{ui.yourDeadline}}</text>
+      <input class="input" value="{{deadline}}" placeholder="YYYY-MM-DD" maxlength="10" data-field="deadline" bindinput="editField" />
+    </view>
+    <text class="field-label">{{ui.scenario || 'Scenario'}}</text>
+    <view wx:if="{{caseId}}" class="picker-box">{{selectedLabel}}</view>
+    <picker
+      wx:if="{{!caseId}}"
+      mode="selector"
+      range="{{scenarioLabels}}"
+      value="{{selectedIndex}}"
+      disabled="{{loading || caseId}}"
+      bindchange="onScenarioChange"
+    >
+      <view class="picker-box">
+        <text>{{selectedLabel}}</text>
+        <text class="picker-chevron">⌄</text>
+      </view>
+    </picker>
+    <button
+      wx:if="{{!caseId}}"
+      style="width:100%;margin-left:0;margin-right:0;"
+      class="primary-button"
+      hover-class="button-pressed"
+      loading="{{loading}}"
+      disabled="{{loading}}"
+      bindtap="generateChecklist"
+    >{{ui.generateChecklist || 'Generate Checklist'}}</button>
+    <button wx:if="{{caseId}}" style="width:100%;margin:0;" class="primary-button" bindtap="openCase">{{ui.cases}}</button>
+    <button wx:if="{{caseId}}" style="width:100%;margin:0;" class="text-button" bindtap="newPlan" disabled="{{loading || saving}}">{{ui.newPlan}}</button>
+    <text wx:if="{{error}}" class="status-error">{{error}}</text>
+  </view>
+  <text wx:if="{{warnings.length}}" class="notice">{{ui.planCoverageGap}}</text>
+  <view wx:if="{{item}}" class="card"><text class="card-title">{{item.title}}</text></view>
+  <view wx:for="{{groups}}" wx:for-item="group" wx:key="key" class="card">
+    <text class="section-title">{{group.label}}</text>
+    <text wx:if="{{!group.items.length}}" class="muted">{{ui.noPlanSteps}}</text>
+    <view wx:for="{{group.items}}" wx:for-item="task" wx:key="task_id" class="checklist-step">
+      <view class="step-content">
+        <text class="step-title">{{task.title}}</text><text class="body-text">{{task.description}}</text>
+        <text class="muted">{{ui.priority}} · {{task.priority}}</text>
+        <text class="muted">{{ui.requiredDocuments}} · {{!task.required_documents.length ? ui.needsConfirmation : ''}}</text>
+        <text wx:for="{{task.required_documents}}" wx:key="*this" class="muted">{{item}}</text>
+        <text class="muted">{{ui.estimatedTime}} · {{task.estimated_time || ui.needsConfirmation}}</text>
+        <text class="muted">{{ui.sources}} · {{!task.source_ids.length ? ui.needsConfirmation : ''}}</text>
+        <text wx:for="{{task.source_ids}}" wx:key="*this" class="muted">{{item}}</text>
+        <text wx:for="{{task.community_source_ids}}" wx:key="*this" class="muted">{{ui.community}} · {{item}}</text>
+        <text wx:if="{{task.due_at}}" class="muted">{{ui.yourDeadline}} · {{task.due_at}}</text>
+        <picker range="{{statusLabels}}" value="{{task.statusIndex}}" data-id="{{task.task_id}}" bindchange="taskStatus" disabled="{{loading || saving || item.status !== 'open'}}">
+          <view class="picker-box">{{ui[task.status]}} ⌄</view>
+        </picker>
+        <button class="text-button" style="width:100%;margin:0;" data-id="{{task.task_id}}" bindtap="taskAction">{{ui.planAction}}</button>
+      </view>
+    </view>
+  </view>
+  <view wx:if="{{hasPrevious || hasNext}}" class="inline-actions">
+    <button style="width:auto;margin:0;" data-direction="-1" disabled="{{!hasPrevious}}" bindtap="pageTasks">{{ui.previousPage}}</button>
+    <button style="width:auto;margin:0;" data-direction="1" disabled="{{!hasNext}}" bindtap="pageTasks">{{ui.nextPage}}</button>
+  </view>
+  <view wx:if="{{sourceIds.length || escalationRecommended}}" class="card">
+    <text class="card-title">{{ui.sources || 'Source notes'}}</text>
+    <text wx:if="{{escalationRecommended}}" class="status-warning">{{ui.human || 'Escalation recommended'}}</text>
+    <view class="tag-row">
+      <text wx:for="{{sourceIds}}" wx:key="*this" class="tag">{{item}}</text>
+    </view>
+  </view>
+</view>

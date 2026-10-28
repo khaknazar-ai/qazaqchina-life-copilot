@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>QminiGuide Source Admin Console</title>
+    <link rel="stylesheet" href="/admin/source-console/admin_source_console.css">
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <h1>QminiGuide Source Admin Console</h1>
+        <p>Local/demo admin console. Not production authentication.</p>
+        <a href="/admin/source-conflicts">Review source conflicts</a>
+        <a href="/admin/source-corpus">Review captured source material</a>
+        <a href="/admin/evaluation">Review evaluation labels</a>
+      </div>
+      <div class="status-pill">source candidates only</div>
+    </header>
+
+    <main class="layout">
+      <section class="panel" aria-label="Operator authentication">
+        <h2>Operator access</h2>
+        <p>This public page contains no private records. Protected API access requires an operator token when authentication is enabled.</p>
+        <label>Operator token<input id="operatorTokenInput" type="password" autocomplete="off" spellcheck="false"></label>
+        <div class="button-row">
+          <button id="connectOperatorButton" type="button">Connect</button>
+          <button id="disconnectOperatorButton" type="button">Disconnect</button>
+        </div>
+        <p id="authStatus" role="status">Token stays in memory for this tab only. Use a trusted HTTPS deployment or localhost.</p>
+      </section>
+      <section class="banner" aria-label="Safety notice">
+        <strong>Fetched or submitted pages are source candidates only, not trusted evidence.</strong>
+        No automatic trusted registry write. Review, registry-ready preview, and ingestion
+        dry-run are required before future source use.
+      </section>
+
+      <section class="panel" id="dashboard">
+        <h2>Dashboard</h2>
+        <div class="metrics">
+          <div><span id="candidateCount">0</span><small>candidates</small></div>
+          <div><span id="registryReadyCount">0</span><small>registry-ready</small></div>
+          <div><span>registry_modified=false</span><small>trusted registry</small></div>
+          <div><span>dry_run=true</span><small>ingestion mode</small></div>
+        </div>
+      </section>
+
+      <section class="panel" id="add-source">
+        <h2>Add Source by URL</h2>
+        <div class="form-grid">
+          <label>URL<input id="urlInput" type="url" placeholder="https://example.gov.cn/example"></label>
+          <label>Scenario<input id="scenarioInput" type="text" placeholder="lost-passport-emergency"></label>
+          <label>Risk level
+            <select id="riskLevelInput">
+              <option value="">unspecified</option>
+              <option value="normal">normal</option>
+              <option value="medium">medium</option>
+              <option value="high">high</option>
+            </select>
+          </label>
+          <label>Language
+            <select id="languageInput">
+              <option value="">unspecified</option>
+              <option value="en">English</option>
+              <option value="ru">Russian</option>
+              <option value="kk">Kazakh</option>
+              <option value="zh">Chinese</option>
+            </select>
+          </label>
+          <label>City<input id="cityInput" type="text" placeholder="Beijing"></label>
+        </div>
+        <div class="check-row">
+          <label><input id="allowNetworkInput" type="checkbox"> Fetch preview manually later</label>
+          <label><input id="confirmNetworkInput" type="checkbox"> I understand this fetches one URL</label>
+        </div>
+        <button id="createCandidateButton" type="button">Create pending candidate</button>
+        <pre id="previewOutput" class="output">No URL submitted yet.</pre>
+      </section>
+
+      <section class="panel" id="candidates">
+        <h2>Source Candidates</h2>
+        <button id="refreshCandidatesButton" type="button">Refresh candidate list</button>
+        <div id="candidateList" class="list"></div>
+      </section>
+
+      <section class="panel" id="review">
+        <h2>Review Candidate</h2>
+        <div class="form-grid">
+          <label>Candidate ID<input id="candidateIdInput" type="text" placeholder="SRC-..."></label>
+          <label>Reviewer ID<input id="reviewerIdInput" type="text" value="local-demo-reviewer"></label>
+          <label>Source type
+            <select id="sourceTypeInput">
+              <option value="official">official</option>
+              <option value="curated_guide">curated_guide</option>
+              <option value="ordinary_community">ordinary_community</option>
+            </select>
+          </label>
+          <label>Trust level
+            <select id="trustLevelInput">
+              <option value="level_1_official">level_1_official</option>
+              <option value="level_2_curated">level_2_curated</option>
+              <option value="level_5_community">level_5_community</option>
+            </select>
+          </label>
+          <label>Freshness note<input id="freshnessNoteInput" type="text" value="Reviewer checked freshness for local demo."></label>
+          <label>Reason<input id="reasonInput" type="text" value="Reviewed in local demo console."></label>
+        </div>
+        <div class="check-row">
+          <label><input id="allowRetrievalInput" type="checkbox"> allow retrieval after approval</label>
+        </div>
+        <div class="button-row">
+          <button id="approveButton" type="button">Approve</button>
+          <button id="rejectButton" type="button">Reject</button>
+          <button id="needsReviewButton" type="button">Needs review</button>
+        </div>
+        <pre id="reviewOutput" class="output">Select or enter a candidate ID.</pre>
+      </section>
+
+      <section class="panel" id="registry-ready">
+        <h2>Registry-Ready Preview</h2>
+        <button id="registryReadyButton" type="button">Load registry-ready preview</button>
+        <pre id="registryOutput" class="output">registry_modified=false</pre>
+      </section>
+
+      <section class="panel" id="ingestion">
+        <h2>Ingestion Dry-Run</h2>
+        <button id="dryRunButton" type="button">Prepare ingestion dry-run</button>
+        <pre id="dryRunOutput" class="output">dry_run=true; registry_modified=false</pre>
+      </section>
+
+      <section class="panel" id="safety">
+        <h2>Safety Notes</h2>
+        <ul>
+          <li>Local/demo only; production authentication is not implemented.</li>
+          <li>Submitted or fetched URLs are not trusted evidence.</li>
+          <li>Pending and needs_review candidates are not retrievable.</li>
+          <li>No source is written to data/sources/*.jsonl automatically.</li>
+          <li>Real URL fetch requires explicit operator confirmation and is not used by tests.</li>
+        </ul>
+      </section>
+    </main>
+
+    <script src="/admin/source-console/admin_source_console.js"></script>
+  </body>
+</html>

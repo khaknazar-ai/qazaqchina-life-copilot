@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Source library · QminiGuide</title>
+  <link rel="stylesheet" href="/admin/source-corpus/corpus.css">
+  <script defer src="/admin/source-corpus/corpus.js"></script>
+</head>
+<body>
+<main>
+  <header><div><p class="eyebrow">QminiGuide / Review workspace</p><h1>Source library</h1>
+  <p>Read the preserved material, verify its scope, then record a review.</p></div>
+  <nav><a href="/admin/source-console">Source console</a><a href="/admin/source-conflicts">Conflicts</a></nav></header>
+  <section class="access">
+    <form id="accessForm"><label for="token">Operator access</label><div class="inline">
+      <input id="token" type="password" autocomplete="off" required aria-label="Operator token">
+      <button id="connect" type="submit">Connect</button><button id="disconnect" type="button" class="secondary">Disconnect</button>
+    </div></form><p id="identity">Disconnected</p>
+  </section>
+  <p id="message" role="status" aria-live="polite"></p>
+  <div class="workspace">
+    <aside><div class="inline"><h2>Captured material</h2><button id="refresh" class="secondary" type="button">Refresh</button></div>
+      <label for="filter">Find a source</label><input id="filter" type="search" placeholder="Title, publisher or ID">
+      <p id="counts" class="muted"></p><div id="queue"></div></aside>
+    <article id="detail" hidden>
+      <div class="inline"><h2 id="title"></h2><span id="status" class="badge"></span></div>
+      <p id="metadata" class="muted"></p><a id="original" target="_blank" rel="noopener noreferrer">Open publisher page</a>
+      <p id="findings"></p><details><summary>Evidence and content hashes</summary><pre id="hashes"></pre></details>
+      <details open><summary>Captured source text</summary><pre id="body" class="source-text"></pre></details>
+      <button id="stage" type="button">Stage for review</button>
+      <section id="reviewPanel" hidden><h3>Review this revision</h3>
+        <p id="reviewContext" class="muted"></p>
+        <form id="reviewForm">
+          <div class="fields"><label>Scenario<select id="scenario"><option value="">General</option></select></label>
+          <label>City / service scope<input id="city" maxlength="100"></label>
+          <label>Risk<select id="risk" multiple><option value="">Normal</option><option>medium</option><option>legal_sensitive</option><option>work_status_sensitive</option><option>medical_sensitive</option><option>emergency</option></select></label>
+          <label>Review expires<input id="expiry" type="datetime-local" required></label></div>
+          <fieldset id="attestations"><legend>Confirm each item after checking the original</legend>
+            <label><input type="checkbox" name="publisher_verified" required> Publisher identity and authority are verified</label>
+            <label><input type="checkbox" name="full_text_verified" required> Full text and extraction match the original</label>
+            <label><input type="checkbox" name="applicability_verified" required> Eligibility, location and service scope are verified</label>
+            <label><input type="checkbox" name="dates_verified" required> Effective dates and currency are verified</label>
+            <label><input type="checkbox" name="reuse_verified" required> Storage and reuse are permitted</label>
+          </fieldset>
+          <fieldset>
+            <legend>Complete passages for answers</legend>
+            <p class="muted">For long originals, copy up to 12 complete passages with all relevant conditions and exceptions. Each passage must be 12–2400 characters and match the preserved text. Separate passages with a line containing only <strong>---</strong>. Leave blank to use a complete short original; longer originals then require further review before cloud answers.</p>
+            <label for="answerPassages">Exact passages<textarea id="answerPassages" rows="8" spellcheck="false"></textarea></label>
+            <label><input id="answerPassagesComplete" type="checkbox"> I checked that each passage is complete and preserves its conditions and exceptions</label>
+          </fieldset>
+          <label>Review evidence / limitations<textarea id="note" required maxlength="1000" rows="3"></textarea></label>
+          <button id="review" type="submit">Record my review</button>
+        </form>
+        <div class="actions"><button id="resetReview" type="button" class="secondary">Start a new review</button><button id="publish" type="button">Publish reviewed revision</button>
+          <button id="revoke" type="button" class="secondary">Revoke publication</button></div>
+        <label id="revokeLabel">Reason for revocation or a new review<textarea id="revokeReason" maxlength="1000" rows="2"></textarea></label>
+      </section>
+      <section><h3>Decision history</h3><ol id="history"></ol></section>
+    </article>
+    <section id="empty" class="empty">Connect and select a source to inspect its evidence.</section>
+  </div>
+</main>
+</body></html>

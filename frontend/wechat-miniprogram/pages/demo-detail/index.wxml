@@ -1,0 +1,136 @@
+<view class="page">
+  <view class="page-heading">
+    <text class="eyebrow">{{ui.demo || 'Demo mode'}}</text>
+    <text class="title">{{scenario.displayTitle}}</text>
+    <text class="subtitle">{{scenario.displayDescription}}</text>
+  </view>
+  <view wx:if="{{error}}" class="card">
+    <text class="status-warning">{{error}}</text>
+  </view>
+  <view class="card">
+    <text class="card-title">{{ui.demoPrompt || 'Example question'}}</text>
+    <text class="body-text">{{scenario.user_message}}</text>
+    <view class="tag-row">
+      <text wx:if="{{scenario.categoryLabel}}" class="tag">{{scenario.categoryLabel}}</text>
+      <text wx:if="{{scenario.riskLabel}}" class="tag tag-risk">{{ui.risk || 'Risk level'}}: {{scenario.riskLabel}}</text>
+    </view>
+    <text class="muted">{{ui.demoNotice}}</text>
+    <button
+      style="width:100%;margin-left:0;margin-right:0;"
+      class="primary-button"
+      hover-class="button-pressed"
+      loading="{{running}}"
+      disabled="{{running}}"
+      bindtap="runDemo"
+    >{{ui.demoRun || 'Run example'}}</button>
+  </view>
+  <view wx:if="{{runError}}" class="card">
+    <text class="status-error">{{runError}}</text>
+  </view>
+  <view wx:if="{{answerView}}" class="card">
+    <text class="card-title">{{ui.demoResult || 'Example response'}}</text>
+    <text wx:if="{{answerView.containsSyntheticSources}}" class="status-warning">{{ui.demoEvidence}}</text>
+    <text wx:if="{{escalationNotice}}" class="status-warning">{{escalationNotice}}</text>
+    <view class="tag-row">
+      <text wx:if="{{resultScenarioLabel}}" class="tag">{{resultScenarioLabel}}</text>
+      <text wx:if="{{resultRiskLabel}}" class="tag tag-risk">{{ui.risk || 'Risk level'}}: {{resultRiskLabel}}</text>
+    </view>
+    <view class="list-item">
+      <text class="section-title">{{ui.direct || 'Direct answer'}}</text>
+      <text wx:if="{{answerView.directAnswer}}" class="body-text">{{answerView.directAnswer}}</text>
+      <text wx:else class="status-warning">{{ui.emptyAnswer || 'No answer available'}}</text>
+    </view>
+    <view wx:if="{{answerView.groundedFacts.length}}" class="list-item">
+      <text class="section-title">{{ui.facts || 'Grounded facts'}}</text>
+      <view wx:for="{{answerView.groundedFacts}}" wx:key="title" class="list-item">
+        <text class="card-title">{{item.title}}</text>
+        <text class="body-text">{{item.body}}</text>
+        <view class="tag-row">
+          <text wx:for="{{item.sourceIds}}" wx:for-item="sourceId" wx:key="*this" class="tag">{{sourceId}}</text>
+        </view>
+      </view>
+    </view>
+    <view wx:if="{{answerView.recommendedSteps.length}}" class="list-item">
+      <text class="section-title">{{ui.steps || 'Recommended next steps'}}</text>
+      <view wx:for="{{answerView.recommendedSteps}}" wx:key="title" class="numbered-step">
+        <view class="step-number">{{index + 1}}</view>
+        <view class="step-content">
+          <text class="card-title">{{item.title}}</text>
+          <text class="body-text">{{item.body}}</text>
+        </view>
+      </view>
+    </view>
+    <view wx:if="{{answerView.checklistItems.length || checklistItems.length}}" class="list-item">
+      <text class="section-title">{{ui.checklist || 'Checklist'}}</text>
+      <view wx:for="{{answerView.checklistItems}}" wx:key="title" class="list-item">
+        <text class="card-title">{{item.title}}</text>
+        <text class="muted">{{item.body}}</text>
+      </view>
+      <view wx:for="{{checklistItems}}" wx:key="item_id" class="list-item">
+        <text class="card-title">{{item.title}}</text>
+        <text class="muted">{{item.description}}</text>
+      </view>
+    </view>
+    <view wx:if="{{answerView.escalationItems.length}}" class="list-item">
+      <text class="section-title">{{ui.human || 'Escalation / official verification'}}</text>
+      <text wx:for="{{answerView.escalationItems}}" wx:key="*this" class="status-warning">{{item}}</text>
+    </view>
+    <view
+      wx:if="{{answerView.uncertaintyItems.length || answerView.noTrustedSourceLabel}}"
+      class="list-item"
+    >
+      <text class="section-title">{{ui.uncertainty || 'Uncertainty / limitations'}}</text>
+      <text wx:if="{{answerView.noTrustedSourceLabel}}" class="status-warning">{{answerView.noTrustedSourceLabel}}</text>
+      <text wx:for="{{answerView.uncertaintyItems}}" wx:key="*this" class="muted">{{item}}</text>
+    </view>
+    <view class="list-item">
+      <text class="section-title">{{ui.sources || 'Source notes'}}</text>
+      <view wx:for="{{answerView.sourceNotes}}" wx:key="sourceId" class="source-note">
+        <text class="source-id">[{{item.sourceId}}]</text>
+        <text class="card-title">{{item.title || item.sourceId}}</text>
+        <text class="muted">{{item.trustLabel}}</text>
+        <text wx:if="{{item.warning}}" class="status-warning">{{item.warning}}</text>
+        <text wx:if="{{item.publisher}}" class="muted">{{item.publisher}}</text>
+        <text wx:if="{{item.reviewedAt}}" class="muted">{{ui.checked}}: {{item.reviewedAt}}</text>
+        <text wx:if="{{item.accessedAt}}" class="muted">{{ui.accessed}}: {{item.accessedAt}}</text>
+        <text wx:if="{{item.url}}" class="source-url" user-select="true">{{item.url}}</text>
+        <button
+          style="width:100%;margin-left:0;margin-right:0;"
+          wx:if="{{item.url}}"
+          class="secondary-button"
+          hover-class="button-pressed"
+          data-index="{{index}}"
+          bindtap="copySourceLink"
+        >{{ui.copySource}}</button>
+      </view>
+      <text wx:if="{{!answerView.sourceNotes.length}}" class="status-warning">{{ui.noTrustedSources || 'No trusted source coverage'}}</text>
+    </view>
+    <view wx:if="{{answerView.verifierWarnings.length}}" class="list-item">
+      <text class="section-title">{{ui.safetyChecks || 'Verifier / safety warnings'}}</text>
+      <text wx:for="{{answerView.verifierWarnings}}" wx:key="*this" class="status-warning">{{item}}</text>
+    </view>
+    <view wx:if="{{answerView.freshnessWarnings.length}}" class="list-item">
+      <text class="section-title">{{ui.freshness || 'Freshness warnings'}}</text>
+      <text wx:for="{{answerView.freshnessWarnings}}" wx:key="*this" class="status-warning">{{item}}</text>
+    </view>
+    <view wx:if="{{result.translation_explanation}}" class="list-item">
+      <text class="section-title">{{ui.translation || 'Text explanation'}}</text>
+      <text class="body-text">{{result.translation_explanation.explanation}}</text>
+      <view class="tag-row">
+        <text wx:for="{{result.translation_explanation.key_terms}}" wx:key="*this" class="tag">{{item}}</text>
+      </view>
+    </view>
+    <view wx:if="{{result.moderation_result}}" class="list-item">
+      <text class="section-title">{{ui.moderation || 'Content review'}}</text>
+      <text class="body-text">{{result.moderation_result.status_recommendation}}</text>
+      <text wx:if="{{result.moderation_result.needs_admin_review}}" class="status-warning">{{ui.human || 'Human review recommended'}}</text>
+    </view>
+    <view wx:if="{{safetyFlags.length}}" class="tag-row">
+      <text wx:for="{{safetyFlags}}" wx:key="*this" class="tag tag-risk">{{item}}</text>
+    </view>
+    <view wx:if="{{result.notes.length}}" class="list-item">
+      <text class="section-title">{{ui.notes || 'Notes'}}</text>
+      <text wx:for="{{result.notes}}" wx:key="*this" class="muted">{{item}}</text>
+    </view>
+  </view>
+</view>
